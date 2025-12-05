@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "wasm:build": "cd wasm && wasm-pack build --target web --out-dir ../public/pkg",
     "start": "next start",
     "lint": "eslint"
@@ -14,6 +14,7 @@
     "next": "16.0.6",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "wasm": "file:wasm/pkg",
     "zustand": "^5.0.9"
   },
   "devDependencies": {
