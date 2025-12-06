@@ -1,15 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import Stage from '@/app/components/Stage';
 import { useStore } from '@/app/store/useStore';
 import ModeSwitcher from '@/app/components/ModeSwitcher';
 import ExportModal from '@/app/components/ExportModal';
+import SettingsModal from '@/app/components/SettingsModal';
+import ModelsModal from '@/app/components/ModelsModal';
 
 export default function EditorPage() {
   const { addFrame, togglePlay, isPlaying, currentFrameIndex, project, setCurrentFrameIndex } = useStore();
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isModelsModalOpen, setIsModelsModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   return (
     <div className="flex h-screen w-screen flex-col bg-gray-50 text-black">
@@ -17,12 +20,12 @@ export default function EditorPage() {
       <header className="h-14 border-b bg-white flex items-center px-4 gap-4">
         <h1 className="font-bold text-lg">Pivot Animator</h1>
         <div className="h-6 w-px bg-gray-300 mx-2"></div>
-        <Link 
-          href="/editor/models"
+        <button 
+          onClick={() => setIsModelsModalOpen(true)}
           className="px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
         >
           Add Figure
-        </Link>
+        </button>
         <button 
           onClick={addFrame}
           className="px-3 py-1.5 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 text-sm font-medium border"
@@ -31,13 +34,13 @@ export default function EditorPage() {
         </button>
         <div className="flex items-center gap-2 mr-4">
           <span className="text-sm text-gray-600">FPS: {useStore.getState().fps}</span>
-          <Link 
-            href="/editor/setting"
+          <button 
+            onClick={() => setIsSettingsModalOpen(true)}
             className="p-2 text-gray-600 hover:bg-gray-100 rounded"
             title="Settings"
           >
             ⚙️
-          </Link>
+          </button>
         </div>
         <button 
           onClick={togglePlay}
@@ -109,6 +112,12 @@ export default function EditorPage() {
 
       {isExportModalOpen && (
         <ExportModal onClose={() => setIsExportModalOpen(false)} />
+      )}
+      {isModelsModalOpen && (
+        <ModelsModal onClose={() => setIsModelsModalOpen(false)} />
+      )}
+      {isSettingsModalOpen && (
+        <SettingsModal onClose={() => setIsSettingsModalOpen(false)} />
       )}
     </div>
   );

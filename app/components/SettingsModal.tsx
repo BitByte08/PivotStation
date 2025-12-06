@@ -1,9 +1,11 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import { useStore } from '../store/useStore';
 
-export default function SettingsModal() {
-  const router = useRouter();
+interface SettingsModalProps {
+  onClose: () => void;
+}
+
+export default function SettingsModal({ onClose }: SettingsModalProps) {
   const { fps, setFps, holdThreshold, setHoldThreshold } = useStore();
 
   return (
@@ -12,7 +14,7 @@ export default function SettingsModal() {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Settings</h2>
           <button 
-            onClick={() => router.back()}
+            onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
           >
             ✕
@@ -65,7 +67,7 @@ export default function SettingsModal() {
 
         <div className="mt-6 flex justify-end">
           <button 
-            onClick={() => router.back()}
+            onClick={onClose}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
           >
             Done
@@ -75,3 +77,4 @@ export default function SettingsModal() {
     </div>
   );
 }
+

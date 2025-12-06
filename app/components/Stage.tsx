@@ -127,7 +127,7 @@ export default function Stage() {
         {!isPlaying && currentFrameIndex > 0 && project.frames[currentFrameIndex - 1] && (
             <g opacity="0.3" style={{ filter: 'grayscale(100%)' }}>
                 {project.frames[currentFrameIndex - 1].figures.map(figure => 
-                    renderFigure(figure, null, () => {}, false) // Non-interactive
+                    renderFigure(figure, null, () => {}) // Non-interactive
                 )}
             </g>
         )}

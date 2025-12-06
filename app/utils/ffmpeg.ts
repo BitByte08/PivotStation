@@ -200,7 +200,7 @@ export class VideoGenerator {
     onProgress(0.8);
 
     const data = await this.ffmpeg.readFile(outputName);
-    const blob = new Blob([data], { type: format === 'mp4' ? 'video/mp4' : 'image/gif' });
+    const blob = new Blob([data as any], { type: format === 'mp4' ? 'video/mp4' : 'image/gif' });
     
     onProgress(1.0);
     return URL.createObjectURL(blob);
