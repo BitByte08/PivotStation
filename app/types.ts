@@ -17,6 +17,7 @@ export interface Pivot {
   children: Pivot[];
   // Visual properties can be determined by mode, but we might need to store custom colors if the user picks them
   customColor?: string; 
+  hidden?: boolean; // If true, this pivot is not selectable/visible
 }
 
 export interface Figure {

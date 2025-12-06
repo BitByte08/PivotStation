@@ -9,7 +9,7 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
   const [pickerState, setPickerState] = useState<{ isOpen: boolean; figureId: string | null }>({ isOpen: false, figureId: null });
 
   const handleMouseDown = (e: React.MouseEvent, pivot: Pivot, figureId: string) => {
-    if (isPlaying) return;
+    if (isPlaying || pivot.hidden) return;
     e.stopPropagation();
 
     // Stretch Mode: Root click opens picker
@@ -107,33 +107,37 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
                         // Find parent to rotate around
                         const parent = findParent(figureClone.root_pivot, p.id);
                         if (parent) {
-                            // Calculate angle and distance
-                            const angle = Math.atan2(targetY - parent.y, targetX - parent.x);
-                            const currentDist = Math.sqrt(Math.pow(p.x - parent.x, 2) + Math.pow(p.y - parent.y, 2));
+                            // Calculate angles
+                            const currentAngle = Math.atan2(p.y - parent.y, p.x - parent.x);
+                            const targetAngle = Math.atan2(targetY - parent.y, targetX - parent.x);
+                            const deltaAngle = targetAngle - currentAngle;
                             
-                            // New position based on angle and FIXED distance
-                            const newX = parent.x + Math.cos(angle) * currentDist;
-                            const newY = parent.y + Math.sin(angle) * currentDist;
+                            // Helper to rotate a point around a center
+                            const rotatePoint = (point: Pivot, center: Pivot, angle: number) => {
+                                const cos = Math.cos(angle);
+                                const sin = Math.sin(angle);
+                                const dx = point.x - center.x;
+                                const dy = point.y - center.y;
+                                point.x = center.x + dx * cos - dy * sin;
+                                point.y = center.y + dx * sin + dy * cos;
+                            };
+
+                            // Rotate p (the dragged pivot)
+                            rotatePoint(p, parent, deltaAngle);
                             
-                            // Calculate actual delta for children
-                            const actualDx = newX - p.x;
-                            const actualDy = newY - p.y;
+                            // Rotate all descendants around the SAME parent (Rigid Body Rotation)
+                            // Actually, if we rotate p around parent, and we want C to move with p...
+                            // If C is attached to p, and p rotates around parent...
+                            // Then C also rotates around parent by the same angle.
+                            // Yes, the whole subtree rotates around the parent.
                             
-                            p.x = newX;
-                            p.y = newY;
-                            
-                            // Rotate children (move them by the same delta)
-                            // Note: This is a simplified rotation where children just translate. 
-                            // For true rigid body rotation, children should rotate around this pivot.
-                            // But for "Stickman" logic, usually we just move the joint and children follow.
-                            const moveChildren = (parent: Pivot) => {
-                                for (const child of parent.children) {
-                                    child.x += actualDx;
-                                    child.y += actualDy;
-                                    moveChildren(child);
+                            const rotateChildren = (subRoot: Pivot) => {
+                                for (const child of subRoot.children) {
+                                    rotatePoint(child, parent, deltaAngle);
+                                    rotateChildren(child);
                                 }
                             };
-                            moveChildren(p);
+                            rotateChildren(p);
                         }
                     }
                 } else if (interactionMode === 'stretch') {

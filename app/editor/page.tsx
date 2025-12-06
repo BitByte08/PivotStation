@@ -1,14 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Stage from '@/app/components/Stage';
 import { useStore } from '@/app/store/useStore';
+import ModeSwitcher from '@/app/components/ModeSwitcher';
+import ExportModal from '@/app/components/ExportModal';
 
 export default function EditorPage() {
   const { addFrame, togglePlay, isPlaying, currentFrameIndex, project, setCurrentFrameIndex } = useStore();
-
-
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   return (
     <div className="flex h-screen w-screen flex-col bg-gray-50 text-black">
@@ -45,14 +46,20 @@ export default function EditorPage() {
           {isPlaying ? 'Stop' : 'Play'}
         </button>
         <button 
+          onClick={() => setIsExportModalOpen(true)}
+          className="px-3 py-1.5 bg-purple-50 text-purple-600 rounded hover:bg-purple-100 text-sm font-medium border border-purple-200 ml-auto"
+        >
+          Export
+        </button>
+        <button 
           onClick={() => {
             if (confirm('Are you sure you want to reset the project?')) {
               useStore.getState().resetProject();
             }
           }}
-          className="px-3 py-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100 text-sm font-medium border border-red-200 ml-auto"
+          className="px-3 py-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100 text-sm font-medium border border-red-200"
         >
-          Reset Project
+          Reset
         </button>
         <button 
           onClick={() => useStore.getState().checkIntegrity()}
@@ -63,26 +70,14 @@ export default function EditorPage() {
       </header>
 
       {/* Main Workspace */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar */}
-        <aside className="w-64 bg-white border-r p-4 hidden md:block">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Figures</h2>
-          {/* Figure list would go here */}
-          <div className="text-sm text-gray-400 italic">No figures selected</div>
-        </aside>
-
-        {/* Stage Area */}
-        <main className="flex-1 bg-gray-100 p-8 flex items-center justify-center overflow-auto">
-          <div className="w-[800px] h-[600px] bg-white shadow-lg">
-            <Stage />
-          </div>
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Stage Area - Full Screen */}
+        <main className="flex-1 bg-gray-100 flex items-center justify-center overflow-hidden relative">
+            <ModeSwitcher />
+            <div className="w-full h-full bg-white shadow-lg">
+                <Stage />
+            </div>
         </main>
-
-        {/* Right Sidebar */}
-        <aside className="w-64 bg-white border-l p-4 hidden md:block">
-           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Properties</h2>
-           {/* Properties would go here */}
-        </aside>
       </div>
 
       {/* Timeline (Bottom) */}
@@ -111,6 +106,10 @@ export default function EditorPage() {
            })}
         </div>
       </div>
+
+      {isExportModalOpen && (
+        <ExportModal onClose={() => setIsExportModalOpen(false)} />
+      )}
     </div>
   );
 }

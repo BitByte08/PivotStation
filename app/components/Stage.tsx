@@ -123,6 +123,16 @@ export default function Stage() {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
+        {/* Onion Skinning: Render previous frame if exists and not playing */}
+        {!isPlaying && currentFrameIndex > 0 && project.frames[currentFrameIndex - 1] && (
+            <g opacity="0.3" style={{ filter: 'grayscale(100%)' }}>
+                {project.frames[currentFrameIndex - 1].figures.map(figure => 
+                    renderFigure(figure, null, () => {}, false) // Non-interactive
+                )}
+            </g>
+        )}
+
+        {/* Current Frame */}
         {frameToShow?.figures.map((figure) => (
            renderFigure(figure, draggingPivotId, handleMouseDown)
         ))}
