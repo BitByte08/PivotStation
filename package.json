@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
+    "build:electron": "cross-env BUILD_TARGET=electron next build --webpack",
     "wasm:build": "cd wasm && wasm-pack build --target web --out-dir ../public/pkg",
     "start": "next start",
     "lint": "eslint",
@@ -14,8 +15,8 @@
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "electron:compile": "tsc -p electron/tsconfig.json",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && npm run electron:compile && electron .\"",
-    "electron:build": "npm run build && npm run electron:compile && electron-builder",
-    "electron:pack": "npm run build && npm run electron:compile && electron-builder --dir"
+    "electron:build": "npm run build:electron && npm run electron:compile && electron-builder",
+    "electron:pack": "npm run build:electron && npm run electron:compile && electron-builder --dir"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",
@@ -35,6 +36,7 @@
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3",
     "electron": "^33.2.1",
     "electron-builder": "^24.13.3",
     "eslint": "^9",
