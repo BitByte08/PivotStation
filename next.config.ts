@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   output: 'export', // Enable static HTML export for Electron
+  trailingSlash: true, // Ensure proper routing with static export
   images: {
     unoptimized: true, // Required for static export
   },
