@@ -2,15 +2,21 @@
   "name": "pivot-station",
   "version": "0.1.0",
   "private": true,
+  "main": "dist-electron/main.js",
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
+    "build:static": "next build --webpack && next export",
     "wasm:build": "cd wasm && wasm-pack build --target web --out-dir ../public/pkg",
     "start": "next start",
     "lint": "eslint",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "electron:compile": "tsc -p electron/tsconfig.json",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && npm run electron:compile && electron .\"",
+    "electron:build": "npm run build:static && npm run electron:compile && electron-builder",
+    "electron:pack": "npm run build:static && npm run electron:compile && electron-builder --dir"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",
@@ -29,10 +35,14 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "concurrently": "^9.1.0",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
     "eslint": "^9",
     "eslint-config-next": "16.0.6",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "wait-on": "^8.0.1",
     "wasm-pack": "^0.13.1",
     "wrangler": "^4.52.1"
   }

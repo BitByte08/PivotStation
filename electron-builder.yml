@@ -1,0 +1,40 @@
+appId: com.pivotstation.app
+productName: PivotStation
+copyright: Copyright © 2024
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - dist-electron/**/*
+  - out/**/*
+
+extraMetadata:
+  main: dist-electron/main.js
+
+win:
+  target:
+    - nsis
+    - portable
+  icon: build/icon.ico
+
+mac:
+  target:
+    - dmg
+    - zip
+  icon: build/icon.icns
+  category: public.app-category.graphics-design
+
+linux:
+  target:
+    - AppImage
+    - deb
+  icon: build/icon.png
+  category: Graphics
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
