@@ -9,8 +9,10 @@ interface AppState {
   fps: number;
   interpolatingTargetIndex: number | null;
   holdThreshold: number; // 0 to 1
+  interactionMode: 'rotate' | 'stretch' | 'flip'; // New state
 
   // Actions
+  setInteractionMode: (mode: 'rotate' | 'stretch' | 'flip') => void;
   setProject: (project: Project) => void;
   addFrame: () => void;
   setCurrentFrameIndex: (index: number) => void;
@@ -43,7 +45,9 @@ export const useStore = create<AppState>((set) => ({
   fps: 10,
   interpolatingTargetIndex: null,
   holdThreshold: 0.5,
+  interactionMode: 'rotate',
 
+  setInteractionMode: (mode) => set({ interactionMode: mode }),
   setProject: (project) => set({ project }),
   setFps: (fps) => set({ fps }),
   setInterpolatingTarget: (index) => set({ interpolatingTargetIndex: index }),

@@ -2,57 +2,13 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Stage from '../components/Stage';
-import { useStore } from '../store/useStore';
-import { Figure } from '../types';
+import Stage from '@/app/components/Stage';
+import { useStore } from '@/app/store/useStore';
 
 export default function EditorPage() {
-  const { addFrame, togglePlay, isPlaying, updateFigure, currentFrameIndex, project, setCurrentFrameIndex } = useStore();
+  const { addFrame, togglePlay, isPlaying, currentFrameIndex, project, setCurrentFrameIndex } = useStore();
 
-  const handleAddStickman = () => {
-    // Create a basic stickman figure
-    const stickman: Figure = {
-      id: `fig-${Date.now()}`,
-      root_pivot: {
-        id: `p-${Date.now()}-root`,
-        type: 'joint',
-        x: 400,
-        y: 300,
-        children: [
-          {
-            id: `p-${Date.now()}-head`,
-            type: 'joint',
-            x: 400,
-            y: 250,
-            children: []
-          },
-          {
-            id: `p-${Date.now()}-spine`,
-            type: 'joint',
-            x: 400,
-            y: 350,
-            children: [
-               {
-                id: `p-${Date.now()}-leg-l`,
-                type: 'joint',
-                x: 380,
-                y: 400,
-                children: []
-               },
-               {
-                id: `p-${Date.now()}-leg-r`,
-                type: 'joint',
-                x: 420,
-                y: 400,
-                children: []
-               }
-            ]
-          }
-        ]
-      }
-    };
-    updateFigure(currentFrameIndex, stickman);
-  };
+
 
   return (
     <div className="flex h-screen w-screen flex-col bg-gray-50 text-black">
@@ -60,12 +16,12 @@ export default function EditorPage() {
       <header className="h-14 border-b bg-white flex items-center px-4 gap-4">
         <h1 className="font-bold text-lg">Pivot Animator</h1>
         <div className="h-6 w-px bg-gray-300 mx-2"></div>
-        <button 
-          onClick={handleAddStickman}
+        <Link 
+          href="/editor/models"
           className="px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
         >
-          Add Stickman
-        </button>
+          Add Figure
+        </Link>
         <button 
           onClick={addFrame}
           className="px-3 py-1.5 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 text-sm font-medium border"
