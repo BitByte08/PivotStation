@@ -1,6 +1,11 @@
 {
   "name": "pivot-station",
   "version": "0.1.0",
+  "description": "PivotStation - 3D Figure Editor",
+  "author": {
+    "name": "PivotStation",
+    "email": "me@bitworkspace.kr"
+  },
   "private": true,
   "main": "dist-electron/main.js",
   "scripts": {
