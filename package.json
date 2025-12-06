@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "npm run wasm:build && next build --webpack",
+    "build": "next build --webpack",
     "wasm:build": "cd wasm && wasm-pack build --target web --out-dir ../public/pkg",
     "start": "next start",
     "lint": "eslint",
