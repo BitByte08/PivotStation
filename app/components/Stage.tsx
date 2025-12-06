@@ -50,7 +50,6 @@ export default function Stage() {
       let t = 0;
       
       const nextIndex = currentFrameIndex + 1;
-      
       if (rawProgress > holdThreshold) {
           if (holdThreshold >= 1) {
              t = 0;
@@ -113,15 +112,14 @@ export default function Stage() {
   const frameToShow = isPlaying ? interpolatedFrame : project.frames[currentFrameIndex];
 
   return (
-    <div className="w-full h-full bg-white border border-gray-200 shadow-sm overflow-hidden relative">
+    <div className="flex-1 px-2 relative">
       <svg 
         ref={svgRef}
-        width="100%" 
-        height="100%" 
-        viewBox="0 0 800 600" 
+        viewBox="0 0 1280 720" 
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        className="max-h-[calc(100vh-12.5rem)] aspect-video mx-auto bg-white border border-gray-200 shadow-sm"
       >
         {/* Onion Skinning: Render previous frame if exists and not playing */}
         {!isPlaying && currentFrameIndex > 0 && project.frames[currentFrameIndex - 1] && (

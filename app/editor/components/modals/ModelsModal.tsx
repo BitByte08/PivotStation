@@ -3,14 +3,12 @@
 import React from 'react';
 import { useStore } from '@/app/store/useStore';
 import { Figure } from '@/app/types';
+import useModal from '@/app/editor/store/useModal';
+import ModalContainer from '@/app/components/containers/ModalContainer';
 
-interface ModelsModalProps {
-  onClose: () => void;
-}
-
-export default function ModelsModal({ onClose }: ModelsModalProps) {
+export default function ModelsModal() {
   const { updateFigure, currentFrameIndex } = useStore();
-
+  const { closeModal } = useModal();
   const createStickman = (): Figure => {
     const hipId = `p-${Date.now()}-hip`;
     const shoulderId = `p-${Date.now()}-shoulder`;
@@ -120,15 +118,15 @@ export default function ModelsModal({ onClose }: ModelsModalProps) {
       case 'circle': figure = createCircle(); break;
     }
     updateFigure(currentFrameIndex, figure);
-    onClose();
+    closeModal();
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <ModalContainer>
       <div className="bg-white rounded-lg shadow-xl w-96 max-w-[90vw] overflow-hidden">
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-xl font-bold">Select a Model</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
+          <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">✕</button>
         </div>
         <div className="p-6 grid grid-cols-2 gap-4">
           <button onClick={() => handleSelect('stickman')} className="p-6 border rounded hover:bg-gray-50 flex flex-col items-center">
@@ -149,6 +147,6 @@ export default function ModelsModal({ onClose }: ModelsModalProps) {
           </button>
         </div>
       </div>
-    </div>
+    </ModalContainer>
   );
 }

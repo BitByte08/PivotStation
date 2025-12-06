@@ -2,14 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useStore } from '@/app/store/useStore';
-
-interface ExportModalProps {
-  onClose: () => void;
-}
+import useModal from '@/app/editor/store/useModal';
 
 import { VideoGenerator } from '@/app/utils/ffmpeg';
+import ModalContainer from '@/app/components/containers/ModalContainer';
 
-export default function ExportModal({ onClose }: ExportModalProps) {
+export default function ExportModal() {
   const { project, fps, holdThreshold } = useStore();
   const [activeTab, setActiveTab] = useState<'video' | 'project'>('video');
   const [format, setFormat] = useState<'mp4' | 'gif'>('mp4');
@@ -18,7 +16,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
   const [playbackFps, setPlaybackFps] = useState(fps); // Default to project fps
   const [isExporting, setIsExporting] = useState(false);
   const [progress, setProgress] = useState(0);
-
+  const { closeModal } = useModal();
   // Update playbackFps if store fps changes (initial load)
   useEffect(() => {
       setPlaybackFps(fps);
@@ -32,7 +30,7 @@ export default function ExportModal({ onClose }: ExportModalProps) {
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
-    onClose();
+    closeModal();
   };
 
   const handleVideoExport = async () => {
@@ -57,12 +55,12 @@ export default function ExportModal({ onClose }: ExportModalProps) {
         alert('Export failed. See console for details.');
     } finally {
         setIsExporting(false);
-        onClose();
+        closeModal();
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <ModalContainer>
       <div className="bg-white rounded-lg shadow-xl w-96 overflow-hidden">
         <div className="flex border-b">
           <button
@@ -157,11 +155,11 @@ export default function ExportModal({ onClose }: ExportModalProps) {
         </div>
 
         <div className="bg-gray-50 p-4 flex justify-end">
-          <button onClick={onClose} className="text-gray-600 hover:text-gray-800 text-sm">
+          <button onClick={closeModal} className="text-gray-600 hover:text-gray-800 text-sm">
             Cancel
           </button>
         </div>
       </div>
-    </div>
+    </ModalContainer>
   );
 }

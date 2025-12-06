@@ -1,10 +1,19 @@
 import React from 'react';
+import MainContainer from '@/app/components/containers/MainContainer';
+import Header from './components/layouts/Header';
+import Timeline from './components/layouts/Timeline';
+import Modal from './components/modals';
 
 export default function EditorLayout({
   children
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <>
+      <Header />
+      {children}
+      <Timeline />
+      <Modal />
+    </>;
 }
 

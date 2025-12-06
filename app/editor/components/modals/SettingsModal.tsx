@@ -1,20 +1,18 @@
 'use client';
-import { useStore } from '../store/useStore';
-
-interface SettingsModalProps {
-  onClose: () => void;
-}
-
-export default function SettingsModal({ onClose }: SettingsModalProps) {
+import ModalContainer from '@/app/components/containers/ModalContainer';
+import { useStore } from '@/app/store/useStore';
+import useModal from '../../store/useModal';
+export default function SettingsModal() {
   const { fps, setFps, holdThreshold, setHoldThreshold } = useStore();
+  const { closeModal } = useModal();
 
   return (
-    <div className="fixed inset-0 bg-black/10 flex items-center justify-center z-50">
+    <ModalContainer>
       <div className="bg-white/30 backdrop-blur-xl rounded-lg p-6 w-96 shadow-2xl border border-white/20">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Settings</h2>
           <button 
-            onClick={onClose}
+            onClick={closeModal}
             className="text-gray-500 hover:text-gray-700"
           >
             ✕
@@ -67,14 +65,14 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
         <div className="mt-6 flex justify-end">
           <button 
-            onClick={onClose}
+            onClick={closeModal}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
           >
             Done
           </button>
         </div>
       </div>
-    </div>
+    </ModalContainer>
   );
 }
 
