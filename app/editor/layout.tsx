@@ -1,5 +1,4 @@
 import React from 'react';
-import MainContainer from '@/app/components/containers/MainContainer';
 import Header from './components/layouts/Header';
 import Timeline from './components/layouts/Timeline';
 import Modal from './components/modals';
