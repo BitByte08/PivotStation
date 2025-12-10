@@ -135,10 +135,10 @@ export default function Stage() {
            renderFigure(figure, draggingPivotId, handleMouseDown)
         ))}
       </svg>
-      <div className="absolute top-2 left-2 text-xs text-gray-500">
+      <div className="absolute top-4 left-4 text-xs text-gray-500">
         Frame: {currentFrameIndex + 1} / {project.frames.length}
       </div>
-      <div className="absolute bottom-2 right-2 text-4xl font-bold text-gray-200 pointer-events-none select-none">
+      <div className="absolute bottom-4 right-4 text-4xl font-bold text-gray-200 pointer-events-none select-none">
         {currentFrameIndex + 1}
       </div>
       {pickerState.isOpen && pickerState.figureId && (
