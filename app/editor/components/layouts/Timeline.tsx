@@ -8,7 +8,7 @@ interface TimelineButtonProps {
   className?: string;
 }
 const TimelineButton: React.FC<TimelineButtonProps> = ({children, onClick, className}) => 
-<div onClick={onClick} className={"w-24 h-full rounded-md flex items-center justify-center cursor-pointer shrink-0 bg-background" + className}>
+<div onClick={onClick} className={"w-24 h-full rounded-md flex items-center justify-center cursor-pointer shrink-0 bg-background relative" + className}>
   {children}
 </div>
 
