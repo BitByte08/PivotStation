@@ -20,17 +20,6 @@ const EditorHeader: React.FC = () => {
 				>
 					Export
 				</button>
-				<button 
-					onClick={() => openModalType('models')}
-					className="px-3 py-1.5 bg-background rounded-md"
-				>
-					Add
-				</button>
-				<button 
-					onClick={togglePlay}
-					className="px-3 py-1.5 bg-background rounded-md mx-2">
-						toggle
-					</button>
 			</nav>
 		</header>
 	);

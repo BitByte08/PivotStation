@@ -8,7 +8,7 @@ export default function SettingsModal() {
 
   return (
     <ModalContainer>
-      <div className="bg-white/30 backdrop-blur-xl rounded-lg p-6 w-96 shadow-2xl border border-white/20">
+      <div className="bg-surface backdrop-blur-xl rounded-lg p-6 w-96 shadow-2xl border border-white/20">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Settings</h2>
           <button 
@@ -23,7 +23,7 @@ export default function SettingsModal() {
           {/* FPS Control */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Playback Speed (FPS): {fps}
+              재생 속도 (FPS): {fps}
             </label>
             <input 
               type="range" 
@@ -34,15 +34,15 @@ export default function SettingsModal() {
               className="w-full"
             />
             <div className="flex justify-between text-xs text-gray-400 mt-1">
-              <span>Slow (1)</span>
-              <span>Fast (60)</span>
+              <span>느리게 (1)</span>
+              <span>빠르게 (60)</span>
             </div>
           </div>
 
           {/* Hold Duration Control */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Hold Duration: {Math.round(holdThreshold * 100)}%
+              프레임 유지 비율: {Math.round(holdThreshold * 100)}%
             </label>
             <input 
               type="range" 
@@ -54,11 +54,11 @@ export default function SettingsModal() {
               className="w-full"
             />
             <div className="flex justify-between text-xs text-gray-400 mt-1">
-              <span>No Hold (0%)</span>
-              <span>Full Hold (100%)</span>
+              <span>유지 안함 (0%)</span>
+              <span>전체 유지 (100%)</span>
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              Percentage of frame time to hold the pose before interpolating.
+              프레임 간 전환 시 프레임이 얼마나 오래 유지되는지를 설정합니다.
             </p>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useStore } from '@/app/store/useStore';
+import { useModal } from '@/app/editor/store/useModal';
 
 export default function ModeSwitcher() {
   const { interactionMode, setInteractionMode } = useStore();
@@ -11,6 +12,8 @@ export default function ModeSwitcher() {
     { id: 'stretch', label: 'Stretch', color: 'bg-orange-500' },
     { id: 'flip', label: 'Flip', color: 'bg-purple-500' },
   ] as const;
+  const { togglePlay, isPlaying } = useStore();
+  const { openModalType, closeModal } = useModal();
 
   return (
     <div className="flex-1 flex flex-col bg-surface rounded-2xl p-3 gap-2">
@@ -28,6 +31,21 @@ export default function ModeSwitcher() {
           {mode.label[0]}
         </button>
       ))}
+      <button
+        className='w-10 h-10 flex items-center justify-center rounded text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200'
+        onClick={togglePlay}>
+       {isPlaying?"II":"▷"}
+      </button>
+      <button
+        className='w-10 h-10 flex items-center justify-center rounded text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200'
+        onClick={()=>openModalType('models')}>
+        +
+      </button>
+      <button
+        className='w-10 h-10 flex items-center justify-center rounded text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200'
+        onClick={()=>openModalType('settings')}>
+        ⚙
+      </button>
     </div>
   );
 }
