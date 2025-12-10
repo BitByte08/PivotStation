@@ -8,7 +8,7 @@ const EditorHeader: React.FC = () => {
 	const { openModalType, closeModal } = useModal();
 
 	return (
-		<header className="h-14 w-full flex bg-surface p-3 items-center rounded-2xl justify-between">
+		<header className="h-14 w-full flex bg-surface p-3 items-center rounded-2xl justify-between shadow-sm">
 			<div className='flex h-full'>
 				<span className="font-bold text-lg text-foreground">Pivot Animator</span>
 				<div className="h-full w-px bg-gray-300 mx-2" />
@@ -20,6 +20,17 @@ const EditorHeader: React.FC = () => {
 				>
 					Export
 				</button>
+				<button 
+					onClick={() => openModalType('models')}
+					className="px-3 py-1.5 bg-background rounded-md"
+				>
+					Add
+				</button>
+				<button 
+					onClick={togglePlay}
+					className="px-3 py-1.5 bg-background rounded-md mx-2">
+						toggle
+					</button>
 			</nav>
 		</header>
 	);

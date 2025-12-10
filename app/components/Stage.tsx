@@ -112,14 +112,14 @@ export default function Stage() {
   const frameToShow = isPlaying ? interpolatedFrame : project.frames[currentFrameIndex];
 
   return (
-    <div className="flex-1 px-2 relative">
+    <>
       <svg 
         ref={svgRef}
         viewBox="0 0 1280 720" 
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className="max-h-[calc(100vh-12.5rem)] aspect-video mx-auto bg-white border border-gray-200 shadow-sm"
+        className="bg-surface shadow-sm"
       >
         {/* Onion Skinning: Render previous frame if exists and not playing */}
         {!isPlaying && currentFrameIndex > 0 && project.frames[currentFrameIndex - 1] && (
@@ -147,6 +147,6 @@ export default function Stage() {
             onClose={() => setPickerState({ isOpen: false, figureId: null })} 
         />
       )}
-    </div>
+    </>
   );
 }

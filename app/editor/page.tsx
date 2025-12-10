@@ -12,13 +12,8 @@ import { useEffect } from 'react';
 
 export default function EditorPage() {
   const { closeModal } = useModal();
-  return (
-      
-    <>
-        <section className="flex-1 w-full bg-background flex items-center justify-center relative">
-            <ModeSwitcher />
-            <Stage />
-        </section>
-    </>
-  );
+  return <>
+      <ModeSwitcher />
+      <Stage />
+    </>;
 }

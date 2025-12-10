@@ -1,80 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  /* Core surface / text tokens */
-  --background: #ffffff;
-  --surface: #ffffff;
-  --on-surface: #1A1A1E;
-  --foreground: #121214;
-
-  /* Material-like Yellow palette (primary) */
-  --md-primary-50:  #FFFDE7;
-  --md-primary-100: #FFF9C4;
-  --md-primary-200: #FFF59D;
-  --md-primary-300: #FFF176;
-  --md-primary-400: #FFEE58;
-  --md-primary-500: #FFEB3B; /* recommended primary */
-  --md-primary-600: #FDD835;
-  --md-primary-700: #FBC02D;
-  --md-primary-800: #F9A825;
-  --md-primary-900: #F57F17;
-  --md-primary-A100:#FFFF8D;
-  --md-primary-A200:#FFFF00;
-  --md-primary-A400:#FFEA00;
-  --md-primary-A700:#FFD600;
-
-  /* Semantic aliases */
-  --primary: var(--md-primary-500);
-  --on-primary: #000000;
-
-  /* Neutral / greys */
-  --grey-50:  #FAFAFA;
-  --grey-100: #F5F5F5;
-  --grey-200: #EEEEEE;
-  --grey-300: #E0E0E0;
-  --grey-400: #BDBDBD;
-  --grey-500: #9E9E9E;
-  --grey-600: #757575;
-  --grey-700: #616161;
-  --grey-800: #424242;
-  --grey-900: #212121;
-
-  /* Mappings used by app */
-  --background-elevated: var(--surface);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --background : #f2f2f2;
+  --surface    : #ffffff;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.bg-background { background-color: var(--background); }
+.bg-surface    { background-color: var(--surface); }
+
+
+.panel-hidden {
+  transform: translateY(-100%);
+  pointer-events: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #121214;
-    --surface: #1A1A1E;
-    --on-surface: #1E1E1D;
-    --foreground: #EDEDED;
-    /* keep primary visible on dark; use a lighter yellow shade */
-    --primary: var(--md-primary-200);
-    --on-primary: #000000;
-  }
+.panel-visible {
+  transform: translateY(0);
 }
 
-/* Utility classes mapped to the color variables */
-.bg-background { background-color: var(--color-background); }
-.bg-surface { background-color: var(--surface); }
-.bg-on-surface { background-color: var(--on-surface); }
-.bg-primary { background-color: var(--primary); }
-.text-primary { color: var(--primary); }
-.text-on-primary { color: var(--on-primary); }
-.bg-foreground { background-color: var(--color-foreground); }
-.text-background { color: var(--color-background); }
-.text-foreground { color: var(--color-foreground); }
-.border-background { border-color: var(--color-background); }
-.border-foreground { border-color: var(--color-foreground); }
+.timeline-hidden {
+  transform: translateY(100%);
+  pointer-events: none;
+}
+
+.timeline-visible {
+  transform: translateY(0);
+}

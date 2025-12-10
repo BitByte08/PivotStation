@@ -8,15 +8,15 @@ interface TimelineButtonProps {
   className?: string;
 }
 const TimelineButton: React.FC<TimelineButtonProps> = ({children, onClick, className}) => 
-<div onClick={onClick} className={"w-24 border-2 h-20 my-auto rounded flex items-center justify-center cursor-pointer relative transition-colors shrink-0 bg-on-surface" + className}>
+<div onClick={onClick} className={"w-24 h-full rounded-md flex items-center justify-center cursor-pointer shrink-0 bg-background" + className}>
   {children}
 </div>
 
 const Timeline: React.FC = () => {
   const { project, currentFrameIndex, setCurrentFrameIndex, addFrame, interpolatingTargetIndex } = useStore();
   return (
-    <footer className="h-32 w-full bg-surface border-t overflow-x-auto p-4 whitespace-nowrap">
-      <div className='flex gap-2 h-full'>
+    <footer className="h-20 w-full bg-surface rounded-2xl p-3 shadow-sm">
+      <div className='flex gap-2 h-full overflow-x-scroll'>
          {project.frames.map((frame, index) => {
            const isCurrent = currentFrameIndex === index;
            const isTarget = interpolatingTargetIndex === index;
@@ -26,8 +26,8 @@ const Timeline: React.FC = () => {
                key={frame.id}
                onClick={() => setCurrentFrameIndex(index)}
                className={`
-                 ${isCurrent ? ' border-blue-500 text-blue-500' : 
-                   isTarget ? ' border-green-400 text-green-600' : 'text-foreground border-background'}
+                 ${isCurrent ? 'border-2 border-blue-500 text-blue-500' : 
+                   isTarget ? 'border-2 border-green-400 text-green-600' : 'text-foreground border-background'}
                `}
              >
                <span className="font-bold">{index + 1}</span>
@@ -40,7 +40,7 @@ const Timeline: React.FC = () => {
          })}
         <TimelineButton 
             onClick={addFrame}
-            className="px-3 py-1.5 bg-gray-100 text-background rounded hover:bg-gray-200 text-sm font-medium border"
+            className="px-3 py-1.5 bg-gray-100 text-background rounded hover:bg-gray-200 text-sm font-medium"
           >
             +
         </TimelineButton>

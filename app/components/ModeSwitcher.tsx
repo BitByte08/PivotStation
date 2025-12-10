@@ -13,7 +13,7 @@ export default function ModeSwitcher() {
   ] as const;
 
   return (
-    <div className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white p-2 rounded-lg shadow-md flex flex-col gap-2 z-10">
+    <div className="flex-1 flex flex-col bg-surface rounded-2xl p-3 gap-2">
       {modes.map((mode) => (
         <button
           key={mode.id}

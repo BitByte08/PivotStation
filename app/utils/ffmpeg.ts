@@ -79,7 +79,7 @@ export class VideoGenerator {
         }
     }
 
-    return `<svg width="${width}" height="${height}" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">${svgContent}</svg>`;
+    return `<svg width="${width}" height="${height}" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">${svgContent}</svg>`;
   }
 
   async createVideo(project: Project, projectFps: number, exportFps: number, format: 'mp4' | 'gif', resolution: '1080p' | '720p', holdThreshold: number, onProgress: (p: number) => void): Promise<string> {
@@ -174,7 +174,7 @@ export class VideoGenerator {
         
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
         
         const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
         if (!blob) throw new Error('Could not create blob from canvas');
