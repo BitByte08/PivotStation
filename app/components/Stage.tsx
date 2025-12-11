@@ -4,7 +4,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useStore } from '@/app/store/useStore';
 import { useInteraction } from '@/app/hooks/useInteraction';
 import { useFigureRender } from '@/app/hooks/useFigureRender';
+import { useDragToDelete } from '@/app/hooks/useDragToDelete';
 import ColorPicker from '@/app/components/ColorPicker';
+import { Pivot } from '@/app/types/figure';
 
 export default function Stage() {
   const { project, currentFrameIndex, isPlaying, setCurrentFrameIndex } = useStore();
@@ -14,6 +16,7 @@ export default function Stage() {
 
   const { handleMouseDown, handleMouseMove, handleMouseUp, draggingPivotId, pickerState, setPickerState } = useInteraction(svgRef);
   const { renderFigure } = useFigureRender();
+  const { isOverDeleteZone, handleMouseMove: handleDeleteMouseMove, handleMouseUp: handleDeleteMouseUp } = useDragToDelete();
 
   // Load Wasm once
   useEffect(() => {
@@ -116,11 +119,51 @@ export default function Stage() {
       <svg 
         ref={svgRef}
         viewBox="0 0 1280 720" 
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseMove={(e) => {
+          if (svgRef.current && draggingPivotId) {
+            const rect = svgRef.current.getBoundingClientRect();
+            const svgX = ((e.clientX - rect.left) / rect.width) * 1280;
+            const svgY = ((e.clientY - rect.top) / rect.height) * 720;
+            handleMouseMove(e);
+            handleDeleteMouseMove(svgX, svgY);
+          } else {
+            handleMouseMove(e);
+          }
+        }}
+        onMouseUp={(e) => {
+          if (svgRef.current && draggingPivotId) {
+            const rect = svgRef.current.getBoundingClientRect();
+            const svgX = ((e.clientX - rect.left) / rect.width) * 1280;
+            const svgY = ((e.clientY - rect.top) / rect.height) * 720;
+            
+            // Find figure ID from dragging pivot
+            const findFigureByPivot = (pivotId: string): string | null => {
+              const findInTree = (pivot: Pivot): boolean => {
+                if (pivot.id === pivotId) return true;
+                return pivot.children?.some((child: Pivot) => findInTree(child)) || false;
+              };
+              return frameToShow?.figures.find(fig => findInTree(fig.root_pivot))?.id || null;
+            };
+            
+            const figureId = findFigureByPivot(draggingPivotId);
+            handleMouseUp();
+            handleDeleteMouseUp(svgX, svgY, figureId);
+          } else {
+            handleMouseUp();
+          }
+        }}
+        onMouseLeave={() => {
+          handleMouseUp();
+          handleDeleteMouseUp(0, 0, null);
+        }}
         className="bg-surface shadow-sm"
       >
+        {/* Delete Zone - Trash Icon */}
+        <g opacity={isOverDeleteZone ? 1 : 0.4} style={{ transition: 'opacity 0.2s', filter: isOverDeleteZone ? 'drop-shadow(0 0 8px #ef4444)' : 'none' }}>
+          <circle cx="1080" cy="600" r="60" fill="none" stroke="#ef4444" strokeWidth="2" opacity={isOverDeleteZone ? 0.8 : 0.2} />
+          <text x="1080" y="615" textAnchor="middle" fontSize="56" fill="#ef4444">🗑️</text>
+        </g>
+
         {/* Onion Skinning: Render previous frame if exists and not playing */}
         {!isPlaying && currentFrameIndex > 0 && project.frames[currentFrameIndex - 1] && (
             <g opacity="0.3" style={{ filter: 'grayscale(100%)' }}>
@@ -132,7 +175,9 @@ export default function Stage() {
 
         {/* Current Frame */}
         {frameToShow?.figures.map((figure) => (
-           renderFigure(figure, draggingPivotId, handleMouseDown)
+           <g key={figure.id}>
+             {renderFigure(figure, draggingPivotId, handleMouseDown)}
+           </g>
         ))}
       </svg>
       <div className="absolute top-4 left-4 text-xs text-gray-500">

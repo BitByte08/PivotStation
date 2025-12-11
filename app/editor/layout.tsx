@@ -42,7 +42,7 @@ export default function EditorLayout({ children }: { children: React.ReactNode }
     <>
       <div
         className={`
-          fixed top-4 left-4 right-4 z-40 transition-all duration-300
+          fixed top-4 left-4 right-4 z-40 transition-all duration-300 select-none
           ${showHeader ? 'panel-visible' : 'panel-hidden'}
         `}
       >
@@ -53,7 +53,7 @@ export default function EditorLayout({ children }: { children: React.ReactNode }
 
       <div
         className={`
-          fixed bottom-4 left-4 right-4 z-40 transition-all duration-300
+          fixed bottom-4 left-4 right-4 z-40 transition-all duration-300 select-none
           ${showTimeline ? 'timeline-visible' : 'timeline-hidden'}
         `}
       >
