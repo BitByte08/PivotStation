@@ -60,17 +60,17 @@ export default function ExportModal() {
   };
 
   return (
-    <ModalContainer>
-      <div className="bg-white rounded-lg shadow-xl w-96 overflow-hidden">
-        <div className="flex border-b">
-          <button
-            className={`flex-1 py-3 text-sm font-medium ${activeTab === 'video' ? 'bg-white text-blue-600 border-b-2 border-blue-600' : 'bg-gray-50 text-gray-600'}`}
+      <ModalContainer isOpen={true}>
+        <div className="bg-surface rounded-2xl rounded-l-none shadow-sm w-96 overflow-hidden">
+          <div className="flex border-b border-foreground/10">
+            <button
+              className={`flex-1 py-3 text-sm font-medium transition-colors bg-background ${activeTab === 'video' ? 'text-primary border-b-2 border-primary' : 'text-foreground/60 hover:text-foreground'}`}
             onClick={() => setActiveTab('video')}
           >
             Video / Image
           </button>
           <button
-            className={`flex-1 py-3 text-sm font-medium ${activeTab === 'project' ? 'bg-white text-blue-600 border-b-2 border-blue-600' : 'bg-gray-50 text-gray-600'}`}
+              className={`flex-1 py-3 text-sm font-medium transition-colors bg-background ${activeTab === 'project' ? 'text-primary border-b-2 border-primary' : 'text-foreground/60 hover:text-foreground'}`}
             onClick={() => setActiveTab('project')}
           >
             Project
@@ -81,22 +81,22 @@ export default function ExportModal() {
           {activeTab === 'video' ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Format</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Format</label>
                 <select 
                   value={format} 
                   onChange={(e) => setFormat(e.target.value as 'mp4' | 'gif')}
-                  className="w-full border rounded p-2"
+                    className="w-full border border-foreground/20 rounded bg-background text-foreground p-2"
                 >
                   <option value="mp4">MP4 Video</option>
                   <option value="gif">GIF Animation</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Resolution</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Resolution</label>
                 <select 
                   value={resolution} 
                   onChange={(e) => setResolution(e.target.value as '1080p' | '720p')}
-                  className="w-full border rounded p-2"
+                    className="w-full border border-foreground/20 rounded bg-background text-foreground p-2"
                 >
                   <option value="1080p">1080p (FHD)</option>
                   <option value="720p">720p (HD)</option>
@@ -104,49 +104,49 @@ export default function ExportModal() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Playback Speed</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">Playback Speed</label>
                     <input 
                       type="number" 
                       value={playbackFps} 
                       onChange={(e) => setPlaybackFps(Number(e.target.value))}
-                      className="w-full border rounded p-2"
+                        className="w-full border border-foreground/20 rounded bg-background text-foreground p-2"
                       min="1" max="60"
                     />
-                    <p className="text-[10px] text-gray-500">Keyframes / sec</p>
+                      <p className="text-[10px] text-foreground/50">Keyframes / sec</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Video Quality</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">Video Quality</label>
                     <input 
                       type="number" 
                       value={exportFps} 
                       onChange={(e) => setExportFps(Number(e.target.value))}
-                      className="w-full border rounded p-2"
+                        className="w-full border border-foreground/20 rounded bg-background text-foreground p-2"
                       min="1" max="120"
                     />
-                    <p className="text-[10px] text-gray-500">Output FPS</p>
+                      <p className="text-[10px] text-foreground/50">Output FPS</p>
                   </div>
               </div>
 
-              <div className="bg-gray-50 p-2 rounded text-xs text-gray-600">
+                <div className="bg-background/50 p-2 rounded text-xs text-foreground/60 border border-foreground/10">
                   <p>Duration: {Math.max(0, (project.frames.length - 1) / playbackFps).toFixed(2)}s</p>
                   <p>Total Frames: {Math.ceil(Math.max(0, (project.frames.length - 1) / playbackFps) * exportFps)}</p>
               </div>
               <button
                 onClick={handleVideoExport}
                 disabled={isExporting}
-                className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                className="w-full py-2 bg-background text-foreground rounded border border-foreground/20 hover:border-foreground/40 disabled:opacity-50 transition-colors"
               >
                 {isExporting ? 'Exporting...' : 'Export Video'}
               </button>
             </div>
           ) : (
             <div className="space-y-4">
-              <p className="text-sm text-gray-600">
+                <p className="text-sm text-foreground/60">
                 Save your project as a <strong>.psproject</strong> file. You can load this file later to continue editing.
               </p>
               <button
                 onClick={handleProjectExport}
-                className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                className="w-full py-2 bg-background text-foreground rounded border border-foreground/20 hover:border-foreground/40 transition-colors"
               >
                 Export Project
               </button>
@@ -154,8 +154,8 @@ export default function ExportModal() {
           )}
         </div>
 
-        <div className="bg-gray-50 p-4 flex justify-end">
-          <button onClick={closeModal} className="text-gray-600 hover:text-gray-800 text-sm">
+          <div className="bg-background/50 p-4 flex justify-end border-t border-foreground/10">
+            <button onClick={closeModal} className="text-foreground/60 hover:text-foreground text-sm transition-colors">
             Cancel
           </button>
         </div>

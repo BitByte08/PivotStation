@@ -13,7 +13,7 @@ export default function ModeSwitcher() {
     { id: 'flip', label: 'Flip', color: 'bg-purple-500' },
   ] as const;
   const { togglePlay, isPlaying } = useStore();
-  const { openModalType, closeModal } = useModal();
+  const { openModalType } = useModal();
 
   return (
     <div className="flex-1 flex flex-col bg-surface rounded-2xl p-3 gap-2">
