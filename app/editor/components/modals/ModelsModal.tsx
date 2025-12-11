@@ -32,27 +32,39 @@ export default function ModelsModal() {
 
   return (
     <ModalContainer>
-      <div className="bg-surface rounded-2xl rounded-l-none shadow-sm w-96 max-w-[90vw] overflow-hidden">
+      <div className="bg-surface rounded-2xl rounded-l-none shadow-sm w-96 max-w-[90vw] h-full overflow-auto flex flex-col">
         <div className="flex justify-between items-center p-4 border-b border-foreground/10">
           <h2 className="text-xl font-bold text-foreground">Select a Model</h2>
           <button onClick={closeModal} className="text-foreground/50 hover:text-foreground transition-colors">✕</button>
         </div>
-        <div className="p-6 grid grid-cols-2 gap-4">
-          <button onClick={() => handleSelect('stickman')} className="p-6 border border-foreground/20 rounded bg-background hover:bg-background transition-colors flex flex-col items-center text-foreground">
-            <div className="w-16 h-16 bg-primary/20 mb-2 rounded-full"></div>
-            <span>Stickman</span>
+        <div className="p-4 flex flex-col gap-3 flex-1 overflow-auto">
+          <button onClick={() => handleSelect('stickman')} className="p-4 border border-foreground/20 rounded-lg bg-background hover:border-foreground/40 transition-colors flex items-center gap-3 text-foreground">
+            <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">🕴</div>
+            <div className="text-left">
+              <div className="text-sm font-medium">Stickman</div>
+              <div className="text-xs text-foreground/60">Basic humanoid rig</div>
+            </div>
           </button>
-          <button onClick={() => handleSelect('simple')} className="p-6 border border-foreground/20 rounded bg-background hover:bg-background transition-colors flex flex-col items-center text-foreground">
-            <div className="w-1 h-16 bg-foreground mb-2"></div>
-            <span>Simple Stick</span>
+          <button onClick={() => handleSelect('simple')} className="p-4 border border-foreground/20 rounded-lg bg-background hover:border-foreground/40 transition-colors flex items-center gap-3 text-foreground">
+            <div className="w-12 h-12 bg-foreground/10 rounded flex items-center justify-center">│</div>
+            <div className="text-left">
+              <div className="text-sm font-medium">Simple Stick</div>
+              <div className="text-xs text-foreground/60">Single segment stick</div>
+            </div>
           </button>
-          <button onClick={() => handleSelect('curve')} className="p-6 border border-foreground/20 rounded bg-background hover:bg-background transition-colors flex flex-col items-center text-foreground">
-            <div className="w-16 h-16 border-t-4 border-foreground rounded-full mb-2"></div>
-            <span>Curve</span>
+          <button onClick={() => handleSelect('curve')} className="p-4 border border-foreground/20 rounded-lg bg-background hover:border-foreground/40 transition-colors flex items-center gap-3 text-foreground">
+            <div className="w-12 h-12 bg-foreground/10 rounded flex items-center justify-center">~</div>
+            <div className="text-left">
+              <div className="text-sm font-medium">Curve</div>
+              <div className="text-xs text-foreground/60">Curved segment</div>
+            </div>
           </button>
-          <button onClick={() => handleSelect('circle')} className="p-6 border border-foreground/20 rounded bg-background hover:bg-background transition-colors flex flex-col items-center text-foreground">
-            <div className="w-16 h-16 border-4 border-foreground rounded-full mb-2"></div>
-            <span>Circle</span>
+          <button onClick={() => handleSelect('circle')} className="p-4 border border-foreground/20 rounded-lg bg-background hover:border-foreground/40 transition-colors flex items-center gap-3 text-foreground">
+            <div className="w-12 h-12 bg-foreground/10 rounded-full flex items-center justify-center">◯</div>
+            <div className="text-left">
+              <div className="text-sm font-medium">Circle</div>
+              <div className="text-xs text-foreground/60">Circle shape</div>
+            </div>
           </button>
         </div>
       </div>

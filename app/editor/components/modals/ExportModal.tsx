@@ -61,7 +61,11 @@ export default function ExportModal() {
 
   return (
       <ModalContainer isOpen={true}>
-        <div className="bg-surface rounded-2xl rounded-l-none shadow-sm w-96 overflow-hidden">
+        <div className="bg-surface rounded-2xl rounded-l-none shadow-sm w-96 h-full overflow-auto flex flex-col">
+          <div className="flex justify-between items-center p-4 border-b border-foreground/10">
+            <h2 className="text-xl font-bold text-foreground">Export</h2>
+            <button onClick={closeModal} className="text-foreground/50 hover:text-foreground transition-colors">✕</button>
+          </div>
           <div className="flex border-b border-foreground/10">
             <button
               className={`flex-1 py-3 text-sm font-medium transition-colors bg-background ${activeTab === 'video' ? 'text-primary border-b-2 border-primary' : 'text-foreground/60 hover:text-foreground'}`}
@@ -77,7 +81,7 @@ export default function ExportModal() {
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-6 flex-1 overflow-auto">
           {activeTab === 'video' ? (
             <div className="space-y-4">
               <div>
@@ -152,12 +156,6 @@ export default function ExportModal() {
               </button>
             </div>
           )}
-        </div>
-
-          <div className="bg-background/50 p-4 flex justify-end border-t border-foreground/10">
-            <button onClick={closeModal} className="text-foreground/60 hover:text-foreground text-sm transition-colors">
-            Cancel
-          </button>
         </div>
       </div>
     </ModalContainer>

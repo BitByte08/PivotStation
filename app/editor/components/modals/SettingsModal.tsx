@@ -8,7 +8,7 @@ export default function SettingsModal() {
 
   return (
     <ModalContainer>
-      <div className="bg-surface rounded-2xl rounded-l-none p-6 w-96 shadow-sm">
+      <div className="bg-surface rounded-2xl rounded-l-none p-6 w-96 h-full shadow-sm overflow-auto flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-foreground">Settings</h2>
           <button 
@@ -19,7 +19,7 @@ export default function SettingsModal() {
           </button>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 flex-1">
           {/* FPS Control */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">

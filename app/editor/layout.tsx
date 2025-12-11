@@ -6,14 +6,20 @@ import Modal from './components/modals'
 import EditorContainer from './components/containers/EditorContainer'
 
 export default function EditorLayout({ children }: { children: React.ReactNode }) {
-  const [showHeader, setShowHeader] = useState(false)
-  const [showTimeline, setShowTimeline] = useState(false)
+  const [showHeader, setShowHeader] = useState(true)
+  const [showTimeline, setShowTimeline] = useState(true)
 
   // 이전 프레임에서 상단/하단 근처였는지 저장하는 flag
   const wasNearTop = useRef(false)
   const wasNearBottom = useRef(false)
 
   useEffect(() => {
+    // 3초 후에 자동으로 숨기기
+    const hideTimer = setTimeout(() => {
+      setShowHeader(false)
+      setShowTimeline(false)
+    }, 3000)
+
     const handleMove = (e: MouseEvent) => {
       const y = e.clientY
       const h = window.innerHeight
@@ -35,7 +41,10 @@ export default function EditorLayout({ children }: { children: React.ReactNode }
     }
 
     window.addEventListener('mousemove', handleMove)
-    return () => window.removeEventListener('mousemove', handleMove)
+    return () => {
+      window.removeEventListener('mousemove', handleMove)
+      clearTimeout(hideTimer)
+    }
   }, [])
 
   return (
