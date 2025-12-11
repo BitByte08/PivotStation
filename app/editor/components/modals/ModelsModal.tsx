@@ -2,120 +2,29 @@
 
 import React from 'react';
 import { useStore } from '@/app/store/useStore';
-import { Figure } from '@/app/types';
+import { createStickman, createSimpleStick, createCurve, createCircle } from '@/app/models/figures';
 import useModal from '@/app/editor/store/useModal';
 import ModalContainer from '@/app/components/containers/ModalContainer';
 
 export default function ModelsModal() {
   const { updateFigure, currentFrameIndex } = useStore();
   const { closeModal } = useModal();
-  const createStickman = (): Figure => {
-    const hipId = `p-${Date.now()}-hip`;
-    const shoulderId = `p-${Date.now()}-shoulder`;
-    const headTopId = `p-${Date.now()}-head-top`;
-    const lElbowId = `p-${Date.now()}-le`;
-    const rElbowId = `p-${Date.now()}-re`;
-    const lHandId = `p-${Date.now()}-lh`;
-    const rHandId = `p-${Date.now()}-rh`;
-    const lKneeId = `p-${Date.now()}-lk`;
-    const rKneeId = `p-${Date.now()}-rk`;
-    const lFootId = `p-${Date.now()}-lf`;
-    const rFootId = `p-${Date.now()}-rf`;
-
-    return {
-      id: `fig-${Date.now()}`,
-      root_pivot: {
-        id: hipId, type: 'joint', x: 400, y: 350, children: [
-          { id: shoulderId, type: 'joint', x: 400, y: 250, children: [
-             { id: headTopId, type: 'joint', x: 400, y: 200, children: [] },
-             { id: lElbowId, type: 'joint', x: 360, y: 280, children: [
-                { id: lHandId, type: 'joint', x: 350, y: 300, children: [] }
-             ]},
-             { id: rElbowId, type: 'joint', x: 440, y: 280, children: [
-                { id: rHandId, type: 'joint', x: 450, y: 300, children: [] }
-             ]}
-          ]},
-          { id: lKneeId, type: 'joint', x: 370, y: 400, children: [
-              { id: lFootId, type: 'joint', x: 370, y: 430, children: [] }
-          ]},
-          { id: rKneeId, type: 'joint', x: 430, y: 400, children: [
-              { id: rFootId, type: 'joint', x: 430, y: 430, children: [] }
-          ]}
-        ]
-      },
-      shapes: [
-        { type: 'line', pivotIds: [hipId, shoulderId] },
-        { type: 'circle', pivotIds: [shoulderId, headTopId] },
-        { type: 'line', pivotIds: [shoulderId, lElbowId] },
-        { type: 'line', pivotIds: [lElbowId, lHandId] },
-        { type: 'line', pivotIds: [shoulderId, rElbowId] },
-        { type: 'line', pivotIds: [rElbowId, rHandId] },
-        { type: 'line', pivotIds: [hipId, lKneeId] },
-        { type: 'line', pivotIds: [lKneeId, lFootId] },
-        { type: 'line', pivotIds: [hipId, rKneeId] },
-        { type: 'line', pivotIds: [rKneeId, rFootId] },
-      ]
-    };
-  };
-
-  const createSimpleStick = (): Figure => {
-    const rootId = `p-${Date.now()}-root`;
-    const endId = `p-${Date.now()}-end`;
-    return {
-      id: `fig-${Date.now()}`,
-      root_pivot: {
-        id: rootId, type: 'joint', x: 400, y: 300, children: [
-          { id: endId, type: 'joint', x: 400, y: 200, children: [] }
-        ]
-      },
-      shapes: [
-        { type: 'line', pivotIds: [rootId, endId] }
-      ]
-    };
-  };
-
-  const createCurve = (): Figure => {
-    const rootId = `p-${Date.now()}-root`;
-    const controlId = `p-${Date.now()}-control`;
-    const endId = `p-${Date.now()}-end`;
-    return {
-      id: `fig-${Date.now()}`,
-      root_pivot: {
-        id: rootId, type: 'joint', x: 350, y: 300, children: [
-          { id: controlId, type: 'joint', x: 400, y: 250, children: [
-             { id: endId, type: 'joint', x: 450, y: 300, children: [] }
-          ]}
-        ]
-      },
-      shapes: [
-        { type: 'curve', pivotIds: [rootId, controlId, endId] }
-      ]
-    };
-  };
-
-  const createCircle = (): Figure => {
-    const rootId = `p-${Date.now()}-root`;
-    const radiusId = `p-${Date.now()}-radius`;
-    return {
-      id: `fig-${Date.now()}`,
-      root_pivot: {
-        id: rootId, type: 'joint', x: 400, y: 300, children: [
-          { id: radiusId, type: 'joint', x: 450, y: 300, children: [] }
-        ]
-      },
-      shapes: [
-        { type: 'circle', pivotIds: [rootId, radiusId] }
-      ]
-    };
-  };
 
   const handleSelect = (type: 'stickman' | 'simple' | 'curve' | 'circle') => {
-    let figure: Figure;
+    let figure;
     switch (type) {
-      case 'stickman': figure = createStickman(); break;
-      case 'simple': figure = createSimpleStick(); break;
-      case 'curve': figure = createCurve(); break;
-      case 'circle': figure = createCircle(); break;
+      case 'stickman':
+        figure = createStickman();
+        break;
+      case 'simple':
+        figure = createSimpleStick();
+        break;
+      case 'curve':
+        figure = createCurve();
+        break;
+      case 'circle':
+        figure = createCircle();
+        break;
     }
     updateFigure(currentFrameIndex, figure);
     closeModal();
