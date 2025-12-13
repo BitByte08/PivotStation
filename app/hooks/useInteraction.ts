@@ -8,35 +8,34 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [pickerState, setPickerState] = useState<{ isOpen: boolean; figureId: string | null }>({ isOpen: false, figureId: null });
 
-  const handleMouseDown = (e: React.MouseEvent, pivot: Pivot, figureId: string) => {
+  const handleMouseDown = (e: React.MouseEvent, pivot: Pivot, figureId: string, isRoot: boolean) => {
     if (isPlaying || pivot.hidden) return;
     e.stopPropagation();
 
     // Stretch Mode: Root click opens picker
-    if (interactionMode === 'stretch' && pivot.id.includes('root')) {
+    if (interactionMode === 'stretch' && isRoot) {
         setPickerState({ isOpen: true, figureId });
     }
 
     // Flip Mode Logic
     if (interactionMode === 'flip') {
-      if (pivot.id.includes('root')) { // Only root pivot triggers flip
-         const frame = project.frames[currentFrameIndex];
-         const figure = frame.figures.find(f => f.id === figureId);
-         if (figure) {
-             const newFigure = JSON.parse(JSON.stringify(figure));
-             // Mirror logic: Flip X coordinates relative to root
-             const rootX = newFigure.root_pivot.x;
-             
-             const flipRecursive = (p: Pivot) => {
-                 p.x = rootX - (p.x - rootX);
-                 p.children.forEach(flipRecursive);
-             };
-             
-             // Flip children, root stays (or effectively flips in place)
-             newFigure.root_pivot.children.forEach(flipRecursive);
-             updateFigure(currentFrameIndex, newFigure);
-         }
-      }
+       // Allow ANY pivot click to trigger flip
+       const frame = project.frames[currentFrameIndex];
+       const figure = frame.figures.find(f => f.id === figureId);
+       if (figure) {
+           const newFigure = JSON.parse(JSON.stringify(figure));
+           // Mirror logic: Flip X coordinates relative to root
+           const rootX = newFigure.root_pivot.x;
+           
+           const flipRecursive = (p: Pivot) => {
+               p.x = rootX - (p.x - rootX);
+               p.children.forEach(flipRecursive);
+           };
+           
+           // Flip children, root stays (or effectively flips in place)
+           newFigure.root_pivot.children.forEach(flipRecursive);
+           updateFigure(currentFrameIndex, newFigure);
+       }
       return;
     }
 

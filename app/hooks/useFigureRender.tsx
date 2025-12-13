@@ -81,7 +81,7 @@ export const useFigureRender = () => {
   const renderPivot = (
     pivot: Pivot, 
     draggingPivotId: string | null, 
-    onMouseDown: (e: React.MouseEvent, p: Pivot) => void,
+    onMouseDown: (e: React.MouseEvent, p: Pivot, isRoot: boolean) => void,
     isRoot: boolean
   ) => {
     // Determine color based on mode
@@ -92,9 +92,7 @@ export const useFigureRender = () => {
     } else if (interactionMode === 'stretch') {
         fill = isRoot ? 'skyblue' : 'orange';
     } else if (interactionMode === 'flip') {
-        fill = isRoot ? 'purple' : 'transparent'; // Hide children in flip mode? Or just not interactive?
-        // User said: "Flip mode: Root pivot purple, no other pivots"
-        if (!isRoot) return null; 
+        fill = isRoot ? 'purple' : 'gray'; // Show all pivots, root is special
     }
 
     // If dragging, maybe highlight?
@@ -110,7 +108,7 @@ export const useFigureRender = () => {
           r={isRoot ? 6 : 4}
           fill={fill}
           cursor="pointer"
-          onMouseDown={(e) => onMouseDown(e, pivot)}
+          onMouseDown={(e) => onMouseDown(e, pivot, isRoot)}
         />
         {pivot.children.map(child => renderPivot(child, draggingPivotId, onMouseDown, false))}
       </g>
@@ -120,7 +118,7 @@ export const useFigureRender = () => {
   const renderFigure = (
     figure: Figure, 
     draggingPivotId: string | null, 
-    onMouseDown: (e: React.MouseEvent, p: Pivot, fId: string) => void
+    onMouseDown: (e: React.MouseEvent, p: Pivot, fId: string, isRoot: boolean) => void
   ) => {
     // Flatten pivots to Map for easy access by shapes
     const allPivots = new Map<string, Pivot>();
@@ -136,10 +134,11 @@ export const useFigureRender = () => {
         {figure.shapes && figure.shapes.map((shape) => renderShape(shape, allPivots, figure.color, figure.opacity))}
         
         {/* Render Pivots on top */}
-        {renderPivot(figure.root_pivot, draggingPivotId, (e, p) => onMouseDown(e, p, figure.id), true)}
+        {renderPivot(figure.root_pivot, draggingPivotId, (e, p, isRoot) => onMouseDown(e, p, figure.id, isRoot), true)}
       </g>
     );
   };
+
 
   return { renderFigure };
 };

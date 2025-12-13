@@ -16,12 +16,35 @@ export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
   const [color, setColor] = useState(figure?.color || '#000000');
   const [opacity, setOpacity] = useState(figure?.opacity ?? 1);
 
+  const [scale, setScale] = useState(100);
+
   useEffect(() => {
     if (figure) {
       setColor(figure.color || '#000000');
       setOpacity(figure.opacity ?? 1);
     }
   }, [figure?.id, figure?.color, figure?.opacity]);
+
+  const handleScale = () => {
+    if (figure && scale !== 100) {
+        const newFigure = JSON.parse(JSON.stringify(figure));
+        const ratio = scale / 100;
+        const rootX = newFigure.root_pivot.x;
+        const rootY = newFigure.root_pivot.y;
+
+        const scaleRecursive = (p: any) => {
+            if (p.id !== newFigure.root_pivot.id) {
+                p.x = rootX + (p.x - rootX) * ratio;
+                p.y = rootY + (p.y - rootY) * ratio;
+            }
+            p.children.forEach(scaleRecursive);
+        };
+        
+        scaleRecursive(newFigure.root_pivot);
+        updateFigure(currentFrameIndex, newFigure);
+        setScale(100); // Reset after applying
+    }
+  };
 
   const handleSave = () => {
     if (figure) {
@@ -34,8 +57,13 @@ export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
   if (!figure) return null;
 
   return (
-    <div className="absolute top-4 right-4 bg-white p-4 rounded shadow-lg border z-50 w-64">
-      <h3 className="font-bold mb-4">Figure Settings</h3>
+    <div className="fixed top-0 right-0 h-full w-80 bg-white shadow-xl border-l z-50 p-6 flex flex-col overflow-y-auto transform transition-transform duration-300 ease-in-out">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="font-bold text-lg">Figure Settings</h3>
+        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            ✕
+        </button>
+      </div>
       
       <div className="mb-4">
         <label className="block text-sm font-medium mb-1">Color</label>
@@ -67,19 +95,38 @@ export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
           className="w-full"
         />
       </div>
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-1">Scale (%)</label>
+        <div className="flex gap-2">
+            <input 
+                type="number" 
+                min="10" 
+                max="500" 
+                value={scale} 
+                onChange={(e) => setScale(parseInt(e.target.value) || 100)}
+                className="flex-1 border rounded px-2 text-sm"
+            />
+            <button 
+                onClick={handleScale}
+                className="px-3 py-1.5 text-sm bg-gray-600 text-white hover:bg-gray-700 rounded"
+            >
+                Apply
+            </button>
+        </div>
+      </div>
 
-      <div className="flex justify-end gap-2">
-        <button 
-          onClick={onClose}
-          className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded"
-        >
-          Cancel
-        </button>
+      <div className="flex flex-col gap-2 mt-auto pt-6 border-t">
         <button 
           onClick={handleSave}
-          className="px-3 py-1.5 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded"
+          className="w-full py-2 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded shadow-sm"
         >
-          Save
+          Save Changes
+        </button>
+        <button 
+          onClick={onClose}
+          className="w-full py-2 text-gray-600 hover:bg-gray-100 rounded"
+        >
+          Cancel
         </button>
       </div>
     </div>
