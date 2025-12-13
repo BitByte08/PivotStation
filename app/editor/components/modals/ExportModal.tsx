@@ -8,7 +8,7 @@ import { VideoGenerator } from '@/app/utils/ffmpeg';
 import ModalContainer from '@/app/components/containers/ModalContainer';
 
 export default function ExportModal() {
-  const { project, fps, holdThreshold } = useStore();
+  const { project, fps, holdThreshold, saveToLocalStorage } = useStore();
   const [activeTab, setActiveTab] = useState<'video' | 'project'>('video');
   const [format, setFormat] = useState<'mp4' | 'gif'>('mp4');
   const [resolution, setResolution] = useState<'1080p' | '720p'>('1080p');
@@ -16,6 +16,7 @@ export default function ExportModal() {
   const [playbackFps, setPlaybackFps] = useState(fps); // Default to project fps
   const [isExporting, setIsExporting] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [saveMessage, setSaveMessage] = useState('');
   const { closeModal } = useModal();
   // Update playbackFps if store fps changes (initial load)
   useEffect(() => {
@@ -57,6 +58,12 @@ export default function ExportModal() {
         setIsExporting(false);
         closeModal();
     }
+  };
+
+  const handleSaveProject = () => {
+    saveToLocalStorage();
+    setSaveMessage('저장되었습니다!');
+    setTimeout(() => setSaveMessage(''), 2000);
   };
 
   return (
@@ -154,6 +161,16 @@ export default function ExportModal() {
               >
                 Export Project
               </button>
+              <p className="text-xs text-foreground/50 border-t border-foreground/10 pt-3">또는 로컬스토리지에 저장하기:</p>
+              <button
+                onClick={handleSaveProject}
+                className="w-full py-2 bg-primary text-on-primary rounded hover:bg-primary/90 transition-colors text-sm font-medium"
+              >
+                Save to Local Storage
+              </button>
+              {saveMessage && (
+                <p className="text-xs text-primary text-center">{saveMessage}</p>
+              )}
             </div>
           )}
         </div>

@@ -160,8 +160,7 @@ export default function Stage() {
       >
         {/* Delete Zone - Trash Icon */}
         <g opacity={isOverDeleteZone ? 1 : 0.4} style={{ transition: 'opacity 0.2s', filter: isOverDeleteZone ? 'drop-shadow(0 0 8px #ef4444)' : 'none' }}>
-          <circle cx="1080" cy="600" r="60" fill="none" stroke="#ef4444" strokeWidth="2" opacity={isOverDeleteZone ? 0.8 : 0.2} />
-          <text x="1080" y="615" textAnchor="middle" fontSize="56" fill="#ef4444">🗑️</text>
+          <text x="1230" y="685" textAnchor="middle" fontSize="56" fill="#ef4444">🗑️</text>
         </g>
 
         {/* Onion Skinning: Render previous frame if exists and not playing */}
@@ -183,7 +182,7 @@ export default function Stage() {
       <div className="absolute top-4 left-4 text-xs text-gray-500">
         Frame: {currentFrameIndex + 1} / {project.frames.length}
       </div>
-      <div className="absolute bottom-4 right-4 text-4xl font-bold text-gray-200 pointer-events-none select-none">
+      <div className="absolute bottom-8 right-8 text-4xl font-bold text-gray-200 pointer-events-none select-none">
         {currentFrameIndex + 1}
       </div>
       {pickerState.isOpen && pickerState.figureId && (

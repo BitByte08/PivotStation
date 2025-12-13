@@ -1,4 +1,32 @@
+'use client';
+
+import { useRef } from 'react';
+import { useStore } from '@/app/store/useStore';
+import { useRouter } from 'next/navigation';
+
 export default function Home() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { setProject } = useStore();
+  const router = useRouter();
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const content = event.target?.result as string;
+        const project = JSON.parse(content);
+        setProject(project);
+        router.push('/editor');
+      } catch {
+        alert('파일을 읽을 수 없습니다. 올바른 .psproject 파일인지 확인해주세요.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="flex flex-col items-center justify-center py-20 px-4">
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
@@ -17,6 +45,35 @@ export default function Home() {
             새로운 애니메이션 프로젝트를 생성해요.
           </p>
         </a>
+        <a
+          href="/projects/"
+          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
+        >
+          <h2 className={`mb-3 text-2xl font-semibold`}>
+            {"> " }내 프로젝트
+          </h2>
+          <p className={`m-0 text-sm opacity-50`}>
+            저장된 프로젝트를 확인해요.
+          </p>
+        </a>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30 text-left"
+        >
+          <h2 className={`mb-3 text-2xl font-semibold`}>
+            {"> " }파일에서 불러오기
+          </h2>
+          <p className={`m-0 text-sm opacity-50`}>
+            .psproject 파일을 불러와요.
+          </p>
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".psproject"
+          onChange={handleFileUpload}
+          style={{ display: 'none' }}
+        />
       </div>
     </div>
   );

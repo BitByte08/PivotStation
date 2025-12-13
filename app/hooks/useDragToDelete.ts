@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useStore } from '@/app/store/useStore';
 
-const DELETE_ZONE_X = 1080;
-const DELETE_ZONE_Y = 600;
+const DELETE_ZONE_X = 1230;
+const DELETE_ZONE_Y = 670;
 const DELETE_ZONE_RADIUS = 50;
 
 export const useDragToDelete = () => {

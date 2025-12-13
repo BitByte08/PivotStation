@@ -3,7 +3,7 @@ import ModalContainer from '@/app/components/containers/ModalContainer';
 import { useStore } from '@/app/store/useStore';
 import useModal from '../../store/useModal';
 export default function SettingsModal() {
-  const { fps, setFps, holdThreshold, setHoldThreshold } = useStore();
+  const { fps, setFps, holdThreshold, setHoldThreshold, project, setProjectName, setProjectDescription, saveToLocalStorage } = useStore();
   const { closeModal } = useModal();
 
   return (
@@ -20,6 +20,34 @@ export default function SettingsModal() {
         </div>
 
         <div className="space-y-6 flex-1">
+          {/* Project Info */}
+          <div className="border-b border-foreground/10 pb-4">
+            <h3 className="text-sm font-bold text-foreground mb-4">Project Info</h3>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Title</label>
+              <input 
+                type="text" 
+                value={project.name}
+                onChange={(e) => setProjectName(e.target.value)}
+                className="w-full border border-foreground/20 rounded bg-background text-foreground p-2 text-sm"
+              />
+            </div>
+            <div className="mt-3">
+              <label className="block text-sm font-medium text-foreground mb-2">Description</label>
+              <textarea 
+                value={project.description}
+                onChange={(e) => setProjectDescription(e.target.value)}
+                className="w-full border border-foreground/20 rounded bg-background text-foreground p-2 text-sm resize-none h-16"
+              />
+            </div>
+            <button 
+              onClick={saveToLocalStorage}
+              className="mt-3 w-full py-2 bg-background text-foreground rounded border border-foreground/20 hover:border-foreground/40 text-sm font-medium transition-colors"
+            >
+              Save Project
+            </button>
+          </div>
+
           {/* FPS Control */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
