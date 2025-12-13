@@ -6,6 +6,10 @@
     "name": "PivotStation",
     "email": "me@bitworkspace.kr"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BitByte08/PivotStation.git"
+  },
   "private": true,
   "main": "dist-electron/main.js",
   "scripts": {
@@ -28,6 +32,7 @@
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
     "@opennextjs/cloudflare": "^1.14.3",
+    "electron-updater": "^6.6.2",
     "next": "16.0.7",
     "react": "19.2.0",
     "react-dom": "19.2.0",

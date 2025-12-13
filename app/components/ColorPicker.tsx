@@ -15,6 +15,7 @@ export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
 
   const [color, setColor] = useState(figure?.color || '#000000');
   const [opacity, setOpacity] = useState(figure?.opacity ?? 1);
+  const [thickness, setThickness] = useState(figure?.thickness || 4);
 
   const [scale, setScale] = useState(100);
 
@@ -22,8 +23,9 @@ export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
     if (figure) {
       setColor(figure.color || '#000000');
       setOpacity(figure.opacity ?? 1);
+      setThickness(figure.thickness || 4);
     }
-  }, [figure?.id, figure?.color, figure?.opacity]);
+  }, [figure?.id, figure?.color, figure?.opacity, figure?.thickness]);
 
   const handleScale = () => {
     if (figure && scale !== 100) {
@@ -48,7 +50,7 @@ export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
 
   const handleSave = () => {
     if (figure) {
-      const newFigure = { ...figure, color, opacity };
+      const newFigure = { ...figure, color, opacity, thickness };
       updateFigure(currentFrameIndex, newFigure);
     }
     onClose();
@@ -94,6 +96,29 @@ export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
           onChange={(e) => setOpacity(parseFloat(e.target.value))}
           className="w-full"
         />
+      </div>
+      
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-1">Thickness: {thickness}px</label>
+        <div className="flex gap-2 items-center">
+             <input 
+                type="range" 
+                min="1" 
+                max="20" 
+                step="1" 
+                value={thickness} 
+                onChange={(e) => setThickness(parseInt(e.target.value))}
+                className="flex-1"
+            />
+            <input 
+                type="number" 
+                min="1" 
+                max="20" 
+                value={thickness}
+                onChange={(e) => setThickness(parseInt(e.target.value) || 4)}
+                className="w-16 border rounded px-2 text-sm"
+            />
+        </div>
       </div>
       <div className="mb-6">
         <label className="block text-sm font-medium mb-1">Scale (%)</label>

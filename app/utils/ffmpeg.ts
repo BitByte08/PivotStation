@@ -73,9 +73,12 @@ export class VideoGenerator {
         collectPivots(figure.root_pivot);
 
         if (figure.shapes) {
+            svgContent += `<g opacity="${figure.opacity ?? 1}">`;
             for (const shape of figure.shapes) {
-                svgContent += renderShape(shape, allPivots, figure.color, figure.opacity);
+                // Pass 1 for opacity to renderShape, handled by group
+                svgContent += renderShape(shape, allPivots, figure.color, 1);
             }
+            svgContent += `</g>`;
         }
     }
 

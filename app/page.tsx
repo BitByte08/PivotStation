@@ -3,6 +3,7 @@
 import { useRef } from 'react';
 import { useStore } from '@/app/store/useStore';
 import { useRouter } from 'next/navigation';
+import UpdateNotification from '@/app/components/UpdateNotification';
 
 export default function Home() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -75,6 +76,7 @@ export default function Home() {
           style={{ display: 'none' }}
         />
       </div>
+      <UpdateNotification />
     </div>
   );
 }

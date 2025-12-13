@@ -10,6 +10,12 @@ files:
   - dist-electron/**/*
   - out/**/*
 
+publish:
+  provider: github
+  owner: BitByte08  # Assuming based on user path, will verify or ask user if needed. 
+  repo: PivotStation
+
+
 extraMetadata:
   main: dist-electron/main.js
 

@@ -26,6 +26,7 @@ export interface Figure {
   shapes: Shape[]; // New: Shapes defined by pivots
   color?: string; // Global figure color
   opacity?: number; // Global figure opacity
+  thickness?: number; // Global stick thickness
 }
 
 // Helper functions for figure operations
@@ -41,6 +42,7 @@ export const createEmptyFigure = (id: string): Figure => ({
   shapes: [],
   color: '#000000',
   opacity: 1,
+  thickness: 4,
 });
 
 export const createPivot = (

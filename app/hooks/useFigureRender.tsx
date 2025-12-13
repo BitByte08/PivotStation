@@ -5,13 +5,13 @@ import { Figure, Pivot, Shape } from '@/app/types';
 export const useFigureRender = () => {
   const { interactionMode } = useStore();
 
-  const renderShape = (shape: Shape, allPivots: Map<string, Pivot>, figureColor?: string, figureOpacity?: number) => {
+  const renderShape = (shape: Shape, allPivots: Map<string, Pivot>, figureColor?: string, figureOpacity?: number, figureThickness?: number) => {
     const pivots = shape.pivotIds.map(id => allPivots.get(id)).filter(p => p !== undefined) as Pivot[];
     
     // Common styles
     const stroke = shape.color || figureColor || 'black';
-    const strokeWidth = 4;
-    const opacity = figureOpacity ?? 1;
+    const strokeWidth = figureThickness || 4;
+    const opacity = 1; // Force opaque, handled by parent group
 
     if (shape.type === 'line' && pivots.length >= 2) {
       return (
@@ -120,25 +120,29 @@ export const useFigureRender = () => {
     draggingPivotId: string | null, 
     onMouseDown: (e: React.MouseEvent, p: Pivot, fId: string, isRoot: boolean) => void
   ) => {
+    if (!figure || !figure.root_pivot) return null;
+
     // Flatten pivots to Map for easy access by shapes
     const allPivots = new Map<string, Pivot>();
     const collectPivots = (p: Pivot) => {
+        if (!p) return;
         allPivots.set(p.id, p);
-        p.children.forEach(collectPivots);
+        if (p.children) {
+            p.children.forEach(collectPivots);
+        }
     };
     collectPivots(figure.root_pivot);
 
     return (
       <g key={figure.id} opacity={figure.opacity ?? 1}>
         {/* Render Shapes First */}
-        {figure.shapes && figure.shapes.map((shape) => renderShape(shape, allPivots, figure.color, figure.opacity))}
+        {figure.shapes && figure.shapes.map((shape) => renderShape(shape, allPivots, figure.color, figure.opacity, figure.thickness))}
         
         {/* Render Pivots on top */}
         {renderPivot(figure.root_pivot, draggingPivotId, (e, p, isRoot) => onMouseDown(e, p, figure.id, isRoot), true)}
       </g>
     );
   };
-
 
   return { renderFigure };
 };

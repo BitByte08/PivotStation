@@ -45,7 +45,8 @@ export default function ExportModal() {
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = `animation.${format}`;
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        a.download = `RefMotion_Export_${timestamp}.${format}`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
