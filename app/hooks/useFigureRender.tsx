@@ -3,14 +3,14 @@ import { useStore } from '@/app/store/useStore';
 import { Figure, Pivot, Shape } from '@/app/types';
 
 export const useFigureRender = () => {
-  const { interactionMode } = useStore();
+  const { interactionMode, globalThickness } = useStore();
 
   const renderShape = (shape: Shape, allPivots: Map<string, Pivot>, figureColor?: string, figureOpacity?: number, figureThickness?: number) => {
     const pivots = shape.pivotIds.map(id => allPivots.get(id)).filter(p => p !== undefined) as Pivot[];
     
     // Common styles
     const stroke = shape.color || figureColor || 'black';
-    const strokeWidth = figureThickness || 4;
+    const strokeWidth = figureThickness || globalThickness || 4;
     const opacity = 1; // Force opaque, handled by parent group
 
     if (shape.type === 'line' && pivots.length >= 2) {

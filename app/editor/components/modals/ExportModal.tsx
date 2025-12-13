@@ -51,10 +51,10 @@ export default function ExportModal() {
         a.click();
         document.body.removeChild(a);
         
-        alert('Export successful!');
+        alert('내보내기가 완료되었습니다! (Export successful!)');
     } catch (e) {
         console.error(e);
-        alert('Export failed. See console for details.');
+        alert('내보내기에 실패했습니다. 콘솔을 확인해주세요. (Export failed.)');
     } finally {
         setIsExporting(false);
         closeModal();
@@ -71,7 +71,7 @@ export default function ExportModal() {
       <ModalContainer isOpen={true}>
         <div className="bg-surface rounded-2xl rounded-l-none shadow-sm w-96 h-full overflow-auto flex flex-col">
           <div className="flex justify-between items-center p-4 border-b border-foreground/10">
-            <h2 className="text-xl font-bold text-foreground">Export</h2>
+            <h2 className="text-xl font-bold text-foreground">내보내기 (Export)</h2>
             <button onClick={closeModal} className="text-foreground/50 hover:text-foreground transition-colors">✕</button>
           </div>
           <div className="flex border-b border-foreground/10">
@@ -79,13 +79,13 @@ export default function ExportModal() {
               className={`flex-1 py-3 text-sm font-medium transition-colors bg-background ${activeTab === 'video' ? 'text-primary border-b-2 border-primary' : 'text-foreground/60 hover:text-foreground'}`}
             onClick={() => setActiveTab('video')}
           >
-            Video / Image
+            동영상 / 이미지
           </button>
           <button
               className={`flex-1 py-3 text-sm font-medium transition-colors bg-background ${activeTab === 'project' ? 'text-primary border-b-2 border-primary' : 'text-foreground/60 hover:text-foreground'}`}
             onClick={() => setActiveTab('project')}
           >
-            Project
+            프로젝트 파일
           </button>
         </div>
 
@@ -93,18 +93,18 @@ export default function ExportModal() {
           {activeTab === 'video' ? (
             <div className="space-y-4">
               <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Format</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">포맷 (Format)</label>
                 <select 
                   value={format} 
                   onChange={(e) => setFormat(e.target.value as 'mp4' | 'gif')}
                     className="w-full border border-foreground/20 rounded bg-background text-foreground p-2"
                 >
-                  <option value="mp4">MP4 Video</option>
-                  <option value="gif">GIF Animation</option>
+                  <option value="mp4">MP4 동영상</option>
+                  <option value="gif">GIF 애니메이션</option>
                 </select>
               </div>
               <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Resolution</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">해상도 (Resolution)</label>
                 <select 
                   value={resolution} 
                   onChange={(e) => setResolution(e.target.value as '1080p' | '720p')}
@@ -116,7 +116,7 @@ export default function ExportModal() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                   <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">Playback Speed</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">재생 속도</label>
                     <input 
                       type="number" 
                       value={playbackFps} 
@@ -124,10 +124,10 @@ export default function ExportModal() {
                         className="w-full border border-foreground/20 rounded bg-background text-foreground p-2"
                       min="1" max="60"
                     />
-                      <p className="text-[10px] text-foreground/50">Keyframes / sec</p>
+                      <p className="text-[10px] text-foreground/50">초당 키프레임 수</p>
                   </div>
                   <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">Video Quality</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">영상 품질</label>
                     <input 
                       type="number" 
                       value={exportFps} 
@@ -135,39 +135,39 @@ export default function ExportModal() {
                         className="w-full border border-foreground/20 rounded bg-background text-foreground p-2"
                       min="1" max="120"
                     />
-                      <p className="text-[10px] text-foreground/50">Output FPS</p>
+                      <p className="text-[10px] text-foreground/50">출력 FPS</p>
                   </div>
               </div>
 
                 <div className="bg-background/50 p-2 rounded text-xs text-foreground/60 border border-foreground/10">
-                  <p>Duration: {Math.max(0, (project.frames.length - 1) / playbackFps).toFixed(2)}s</p>
-                  <p>Total Frames: {Math.ceil(Math.max(0, (project.frames.length - 1) / playbackFps) * exportFps)}</p>
+                  <p>예상 길이: {Math.max(0, (project.frames.length - 1) / playbackFps).toFixed(2)}초</p>
+                  <p>총 프레임 수: {Math.ceil(Math.max(0, (project.frames.length - 1) / playbackFps) * exportFps)}장</p>
               </div>
               <button
                 onClick={handleVideoExport}
                 disabled={isExporting}
                 className="w-full py-2 bg-background text-foreground rounded border border-foreground/20 hover:border-foreground/40 disabled:opacity-50 transition-colors"
               >
-                {isExporting ? 'Exporting...' : 'Export Video'}
+                {isExporting ? '내보내는 중... (Exporting...)' : '동영상 내보내기 (Export Video)'}
               </button>
             </div>
           ) : (
             <div className="space-y-4">
                 <p className="text-sm text-foreground/60">
-                Save your project as a <strong>.psproject</strong> file. You can load this file later to continue editing.
+                프로젝트를 <strong>.psproject</strong> 파일로 저장합니다. 나중에 이 파일을 불러와서 다시 편집할 수 있습니다.
               </p>
               <button
                 onClick={handleProjectExport}
                 className="w-full py-2 bg-background text-foreground rounded border border-foreground/20 hover:border-foreground/40 transition-colors"
               >
-                Export Project
+                프로젝트 파일 저장
               </button>
-              <p className="text-xs text-foreground/50 border-t border-foreground/10 pt-3">또는 로컬스토리지에 저장하기:</p>
+              <p className="text-xs text-foreground/50 border-t border-foreground/10 pt-3">또는 브라우저 로컬스토리지에 저장하기:</p>
               <button
                 onClick={handleSaveProject}
                 className="w-full py-2 bg-primary text-on-primary rounded hover:bg-primary/90 transition-colors text-sm font-medium"
               >
-                Save to Local Storage
+                로컬 저장소에 저장 (Save to Local Storage)
               </button>
               {saveMessage && (
                 <p className="text-xs text-primary text-center">{saveMessage}</p>

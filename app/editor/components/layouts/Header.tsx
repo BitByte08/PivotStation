@@ -16,9 +16,9 @@ const EditorHeader: React.FC = () => {
 			<nav>
 				<button 
 					onClick={() => openModalType('export')}
-					className="px-3 py-1.5 bg-background rounded-md"
+					className="px-3 py-1.5 bg-background rounded-md font-medium text-sm hover:bg-gray-100 transition-colors"
 				>
-					Export
+					내보내기 (Export)
 				</button>
 			</nav>
 		</header>

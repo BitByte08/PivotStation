@@ -61,14 +61,14 @@ export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
   return (
     <div className="fixed top-0 right-0 h-full w-80 bg-white shadow-xl border-l z-50 p-6 flex flex-col overflow-y-auto transform transition-transform duration-300 ease-in-out">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="font-bold text-lg">Figure Settings</h3>
+        <h3 className="font-bold text-lg">도형 설정 (Figure Settings)</h3>
         <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             ✕
         </button>
       </div>
       
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Color</label>
+        <label className="block text-sm font-medium mb-1">색상 (Color)</label>
         <div className="flex gap-2">
             <input 
             type="color" 
@@ -86,7 +86,7 @@ export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
       </div>
 
       <div className="mb-6">
-        <label className="block text-sm font-medium mb-1">Opacity: {Math.round(opacity * 100)}%</label>
+        <label className="block text-sm font-medium mb-1">투명도 (Opacity): {Math.round(opacity * 100)}%</label>
         <input 
           type="range" 
           min="0" 
@@ -99,7 +99,7 @@ export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
       </div>
       
       <div className="mb-6">
-        <label className="block text-sm font-medium mb-1">Thickness: {thickness}px</label>
+        <label className="block text-sm font-medium mb-1">선 굵기 (Thickness): {thickness}px</label>
         <div className="flex gap-2 items-center">
              <input 
                 type="range" 
@@ -121,7 +121,7 @@ export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
         </div>
       </div>
       <div className="mb-6">
-        <label className="block text-sm font-medium mb-1">Scale (%)</label>
+        <label className="block text-sm font-medium mb-1">크기 조절 (Scale %)</label>
         <div className="flex gap-2">
             <input 
                 type="number" 
@@ -135,7 +135,7 @@ export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
                 onClick={handleScale}
                 className="px-3 py-1.5 text-sm bg-gray-600 text-white hover:bg-gray-700 rounded"
             >
-                Apply
+                적용 (Apply)
             </button>
         </div>
       </div>
@@ -145,13 +145,13 @@ export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
           onClick={handleSave}
           className="w-full py-2 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded shadow-sm"
         >
-          Save Changes
+          저장 (Save)
         </button>
         <button 
           onClick={onClose}
           className="w-full py-2 text-gray-600 hover:bg-gray-100 rounded"
         >
-          Cancel
+          취소 (Cancel)
         </button>
       </div>
     </div>

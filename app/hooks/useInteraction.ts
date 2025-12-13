@@ -161,15 +161,8 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
                         p.x = targetX;
                         p.y = targetY;
                         
-                        // Move children by same delta
-                        const moveChildren = (parent: Pivot) => {
-                            for (const child of parent.children) {
-                                child.x += dx;
-                                child.y += dy;
-                                moveChildren(child);
-                            }
-                        };
-                        moveChildren(p);
+                        // In Stretch mode, we do NOT move children. 
+                        // They stay where they are, effectively "stretching" the bone connecting to them.
                     }
                 }
 

@@ -9,9 +9,11 @@ interface AppState {
   fps: number;
   interpolatingTargetIndex: number | null;
   holdThreshold: number; // 0 to 1
-  interactionMode: 'rotate' | 'stretch' | 'flip'; // New state
+  interactionMode: 'rotate' | 'stretch' | 'flip';
+  globalThickness: number;
 
   // Actions
+  setGlobalThickness: (thickness: number) => void;
   setInteractionMode: (mode: 'rotate' | 'stretch' | 'flip') => void;
   setProject: (project: Project) => void;
   setProjectName: (name: string) => void;
@@ -52,7 +54,9 @@ export const useStore = create<AppState>((set, get) => ({
   interpolatingTargetIndex: null,
   holdThreshold: 0.5,
   interactionMode: 'rotate',
+  globalThickness: 4,
 
+  setGlobalThickness: (thickness) => set({ globalThickness: thickness }),
   setInteractionMode: (mode) => set({ interactionMode: mode }),
   setProject: (project) => set({ project }),
   setProjectName: (name) => set((state) => ({ 
