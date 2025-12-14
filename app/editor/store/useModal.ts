@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ModalType = 'export' | 'models' | 'settings' | null;
+export type ModalType = 'export' | 'models' | 'settings' | 'figure-settings' | null;
 
 interface ModalState {
   openModal: ModalType;
@@ -13,5 +13,3 @@ export const useModal = create<ModalState>((set, get) => ({
   openModalType: (t) => set({ openModal: t }),
   closeModal: () => set({ openModal: null }),
 }));
-
-export default useModal;

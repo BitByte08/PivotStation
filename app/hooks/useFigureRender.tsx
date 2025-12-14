@@ -5,6 +5,24 @@ import { Figure, Pivot, Shape } from '@/app/types';
 export const useFigureRender = () => {
   const { interactionMode, globalThickness } = useStore();
 
+  // Convert flat structure (pivots[], parentMap) to hierarchical structure (root_pivot with children)
+  const buildHierarchy = (pivots: Pivot[], parentMap: Record<string, string | null>, rootPivotId: string): Pivot | null => {
+    if (!rootPivotId || !pivots.length) return null;
+    
+    const pivotMap = new Map(pivots.map(p => [p.id, { ...p, children: [] }]));
+    
+    // Build parent-child relationships
+    for (const [childId, parentId] of Object.entries(parentMap)) {
+      if (parentId && pivotMap.has(childId) && pivotMap.has(parentId)) {
+        const parent = pivotMap.get(parentId)!;
+        const child = pivotMap.get(childId)!;
+        parent.children!.push(child);
+      }
+    }
+    
+    return pivotMap.get(rootPivotId) || null;
+  };
+
   const renderShape = (shape: Shape, allPivots: Map<string, Pivot>, figureColor?: string, figureOpacity?: number, figureThickness?: number) => {
     const pivots = shape.pivotIds.map(id => allPivots.get(id)).filter(p => p !== undefined) as Pivot[];
     
@@ -120,26 +138,40 @@ export const useFigureRender = () => {
     draggingPivotId: string | null, 
     onMouseDown: (e: React.MouseEvent, p: Pivot, fId: string, isRoot: boolean) => void
   ) => {
-    if (!figure || !figure.root_pivot) return null;
+    if (!figure) return null;
 
-    // Flatten pivots to Map for easy access by shapes
-    const allPivots = new Map<string, Pivot>();
-    const collectPivots = (p: Pivot) => {
+    // Support both new flat structure and old hierarchical structure
+    let allPivots = new Map<string, Pivot>();
+    let hierarchicalRoot: Pivot | null = null;
+    
+    if (figure.pivots && figure.pivots.length > 0) {
+      // New flat structure - convert to hierarchical for rendering
+      figure.pivots.forEach(p => allPivots.set(p.id, p));
+      
+      const rootPivotId = figure.pivots[0]?.id;
+      hierarchicalRoot = buildHierarchy(figure.pivots, figure.parentMap || {}, rootPivotId);
+    } else if (figure.root_pivot) {
+      // Old hierarchical structure - use as is
+      const collectPivots = (p: Pivot) => {
         if (!p) return;
         allPivots.set(p.id, p);
-        if (p.children) {
-            p.children.forEach(collectPivots);
+        if ((p as any).children) {
+          (p as any).children.forEach(collectPivots);
         }
-    };
-    collectPivots(figure.root_pivot);
+      };
+      collectPivots(figure.root_pivot);
+      hierarchicalRoot = figure.root_pivot;
+    } else {
+      return null;
+    }
 
     return (
       <g key={figure.id} opacity={figure.opacity ?? 1}>
         {/* Render Shapes First */}
         {figure.shapes && figure.shapes.map((shape) => renderShape(shape, allPivots, figure.color, figure.opacity, figure.thickness))}
         
-        {/* Render Pivots on top */}
-        {renderPivot(figure.root_pivot, draggingPivotId, (e, p, isRoot) => onMouseDown(e, p, figure.id, isRoot), true)}
+        {/* Render Pivots on top using hierarchical structure */}
+        {hierarchicalRoot && renderPivot(hierarchicalRoot, draggingPivotId, (e, p, isRoot) => onMouseDown(e, p, figure.id, isRoot), true)}
       </g>
     );
   };

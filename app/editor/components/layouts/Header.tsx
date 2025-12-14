@@ -6,12 +6,27 @@ import { useModal } from '@/app/editor/store/useModal';
 
 const EditorHeader: React.FC = () => {
 	const router = useRouter();
-	const { saveToLocalStorage, project } = useStore();
+	const { saveToLocalStorage, project, editorMode, saveBuilderFigure, exportBuilderFigure, builderFigure } = useStore();
 	const { openModalType, closeModal } = useModal();
 
 	const handleSave = () => {
-		saveToLocalStorage();
-		alert(`'${project.name}' 프로젝트가 저장되었습니다!`);
+		if (editorMode === 'figure') {
+			const name = builderFigure?.name || 'DefaultFigure';
+			saveBuilderFigure(name);
+			alert(`'${name}' 피규어가 라이브러리에 저장되었습니다!`);
+		} else {
+			saveToLocalStorage();
+			alert(`'${project.name}' 프로젝트가 저장되었습니다!`);
+		}
+	};
+
+	const handleExport = () => {
+		if (editorMode === 'figure') {
+			const name = builderFigure?.name || 'DefaultFigure';
+			exportBuilderFigure(name);
+		} else {
+			openModalType('export');
+		}
 	};
 
 	return (
@@ -37,7 +52,7 @@ const EditorHeader: React.FC = () => {
 					저장
 				</button>
 				<button 
-					onClick={() => openModalType('export')}
+					onClick={handleExport}
 					className="px-3 py-1.5 bg-background rounded-md font-medium text-sm hover:bg-gray-100 transition-colors"
 				>
 					내보내기 (Export)

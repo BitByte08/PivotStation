@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Project, Frame, Figure, Pivot, Shape } from '@/app/types';
 
-export type BuilderTool = 'select' | 'add-pivot' | 'connect' | 'set-root' | 'set-joint' | 'set-fixed';
+export type BuilderTool = 'select' | 'add-pivot' | 'connect' | 'connect-curve' | 'set-root' | 'set-joint' | 'set-fixed' | 'delete';
 export type ValidationError = {
   type: 'isolated-pivot' | 'invalid-joint' | 'no-root';
   pivotId?: string;
@@ -65,10 +65,9 @@ interface AppState {
   removeBuilderShape: (shapeIndex: number) => void;
   setBuilderPivotType: (pivotId: string, type: 'joint' | 'fixed') => void;
   setBuilderRootPivot: (pivotId: string) => void;
+  setBuilderFigureColor: (color: string) => void;
+  setBuilderFigureThickness: (thickness: number) => void;
   validateBuilderFigure: () => void;
-  saveBuilderFigure: (name: string) => void;
-  loadBuilderFigure: (figureId: string) => void;
-  exportBuilderFigure: (name: string) => void;
   resetBuilderFigure: () => void;
   addConnectingPivot: (pivotId: string) => void;
   clearConnectingPivots: () => void;
@@ -268,61 +267,56 @@ export const useStore = create<AppState>((set, get) => ({
   }),
   
   // Builder actions
-  initBuilderFigure: () => set({
-    builderFigure: {
-      id: `figure-${Date.now()}`,
-      // Wrapper root to allow multiple top-level roots (forest)
-      root_pivot: {
-        id: 'root-container',
-        type: 'fixed',
-        x: 640,
-        y: 360,
-        children: []
+  initBuilderFigure: () => {
+    const initialPivotId = `pivot-${Date.now()}`;
+    const initialState = {
+      builderFigure: {
+        id: `figure-${Date.now()}`,
+        pivots: [
+          {
+            id: initialPivotId,
+            type: 'fixed' as const,
+            x: 640,
+            y: 360
+          }
+        ],
+        parentMap: {
+          [initialPivotId]: null
+        },
+        shapes: [],
+        color: '#000000',
+        opacity: 1,
+        thickness: 4
       },
-      shapes: [],
-      color: '#000000',
-      opacity: 1,
-      thickness: 4
-    },
-    builderRootPivotId: 'root-container',
-    selectedPivotIds: [],
-    validationErrors: []
-  }),
+      builderRootPivotId: initialPivotId,
+      selectedPivotIds: [],
+      validationErrors: []
+    };
+    
+    set(initialState);
+    setTimeout(() => useStore.getState().validateBuilderFigure(), 0);
+  },
   
-  setBuilderTool: (tool) => set({ builderTool: tool }),
+  setBuilderTool: (tool) => set({ builderTool: tool, connectingPivots: [] }),
   
   addBuilderPivot: (x, y, parentId) => set((state) => {
     if (!state.builderFigure) return state;
     
-    const newPivot: Pivot = {
-      id: `pivot-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type: 'joint',
-      x,
-      y,
-      children: []
-    };
-    
+    const newPivotId = `pivot-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const figure = JSON.parse(JSON.stringify(state.builderFigure)) as Figure;
     
-    if (parentId) {
-      // Find parent and add as child
-      const findAndAddChild = (pivot: Pivot): boolean => {
-        if (pivot.id === parentId) {
-          pivot.children.push(newPivot);
-          return true;
-        }
-        for (const child of pivot.children) {
-          if (findAndAddChild(child)) return true;
-        }
-        return false;
-      };
-      findAndAddChild(figure.root_pivot);
-    } else {
-      // Add as child of root
-      figure.root_pivot.children.push(newPivot);
-    }
+    figure.pivots.push({
+      id: newPivotId,
+      type: 'joint',
+      x,
+      y
+    });
     
-    return { builderFigure: figure };
+    figure.parentMap[newPivotId] = parentId || null;
+    
+    const newState = { builderFigure: figure };
+    setTimeout(() => useStore.getState().validateBuilderFigure(), 0);
+    return newState;
   }),
   
   removeBuilderPivot: (pivotId) => set((state) => {
@@ -330,24 +324,29 @@ export const useStore = create<AppState>((set, get) => ({
     
     const figure = JSON.parse(JSON.stringify(state.builderFigure)) as Figure;
     
-    // Remove pivot from hierarchy
-    const removeFromHierarchy = (pivot: Pivot): boolean => {
-      pivot.children = pivot.children.filter(child => {
-        if (child.id === pivotId) return false;
-        removeFromHierarchy(child);
-        return true;
-      });
-      return true;
-    };
-    removeFromHierarchy(figure.root_pivot);
+    // Remove pivot from list
+    figure.pivots = figure.pivots.filter(p => p.id !== pivotId);
+    
+    // Remove from parentMap and update children's parent
+    const parentId = figure.parentMap[pivotId];
+    delete figure.parentMap[pivotId];
+    
+    // Reparent children to this pivot's parent
+    Object.entries(figure.parentMap).forEach(([childId, childParent]) => {
+      if (childParent === pivotId) {
+        figure.parentMap[childId] = parentId;
+      }
+    });
     
     // Remove shapes containing this pivot
     figure.shapes = figure.shapes.filter(shape => !shape.pivotIds.includes(pivotId));
     
-    return {
+    const newState = {
       builderFigure: figure,
       selectedPivotIds: state.selectedPivotIds.filter(id => id !== pivotId)
     };
+    setTimeout(() => useStore.getState().validateBuilderFigure(), 0);
+    return newState;
   }),
   
   togglePivotSelection: (pivotId) => set((state) => {
@@ -366,20 +365,12 @@ export const useStore = create<AppState>((set, get) => ({
     
     const figure = JSON.parse(JSON.stringify(state.builderFigure)) as Figure;
     
-    // Find and update pivot position
-    const movePivot = (pivot: Pivot): boolean => {
-      if (pivot.id === pivotId) {
-        pivot.x = x;
-        pivot.y = y;
-        return true;
-      }
-      for (const child of pivot.children) {
-        if (movePivot(child)) return true;
-      }
-      return false;
-    };
+    const pivot = figure.pivots.find(p => p.id === pivotId);
+    if (pivot) {
+      pivot.x = x;
+      pivot.y = y;
+    }
     
-    movePivot(figure.root_pivot);
     return { builderFigure: figure };
   }),
   
@@ -397,10 +388,12 @@ export const useStore = create<AppState>((set, get) => ({
     
     figure.shapes.push(newShape);
     
-    return {
+    const newState = {
       builderFigure: figure,
       selectedPivotIds: []
     };
+    setTimeout(() => useStore.getState().validateBuilderFigure(), 0);
+    return newState;
   }),
   
   removeBuilderShape: (shapeIndex) => set((state) => {
@@ -416,18 +409,10 @@ export const useStore = create<AppState>((set, get) => ({
     if (!state.builderFigure) return state;
     
     const figure = JSON.parse(JSON.stringify(state.builderFigure)) as Figure;
-    
-    const updatePivotType = (pivot: Pivot): boolean => {
-      if (pivot.id === pivotId) {
-        pivot.type = type;
-        return true;
-      }
-      for (const child of pivot.children) {
-        if (updatePivotType(child)) return true;
-      }
-      return false;
-    };
-    updatePivotType(figure.root_pivot);
+    const pivot = figure.pivots.find(p => p.id === pivotId);
+    if (pivot) {
+      pivot.type = type;
+    }
     
     return { builderFigure: figure };
   }),
@@ -435,38 +420,30 @@ export const useStore = create<AppState>((set, get) => ({
   setBuilderRootPivot: (pivotId) => set((state) => {
     if (!state.builderFigure) return state;
 
-    const figure = JSON.parse(JSON.stringify(state.builderFigure)) as Figure;
-    const container = figure.root_pivot;
-
-    // Find pivot and its parent within the forest
-    let target: Pivot | null = null;
-    let parent: Pivot | null = null;
-    const walk = (p: Pivot, par: Pivot | null = null) => {
-      if (p.id === pivotId) {
-        target = p;
-        parent = par;
-        return;
-      }
-      p.children.forEach((child) => {
-        if (!target) walk(child, p);
-      });
-    };
-
-    container.children.forEach((rootChild) => {
-      if (!target) walk(rootChild, container);
-    });
-
-    if (!target || !parent) return state; // not found or already top-level
-
-    // Detach target from its parent
-    const parentPivot: Pivot = parent;
-    parentPivot.children = parentPivot.children.filter((c) => c.id !== pivotId);
-
-    // Add target as a new top-level root under the container
-    if (container.children.every((c) => c.id !== target!.id)) {
-      container.children.push(target);
+    // Toggle behavior
+    if (state.builderRootPivotId === pivotId) {
+      return { builderRootPivotId: null };
     }
 
+    // Check if pivot exists
+    const exists = state.builderFigure.pivots.some(p => p.id === pivotId);
+    if (!exists) return state;
+
+    setTimeout(() => useStore.getState().validateBuilderFigure(), 0);
+    return { builderRootPivotId: pivotId };
+  }),
+  
+  setBuilderFigureColor: (color) => set((state) => {
+    if (!state.builderFigure) return state;
+    const figure = JSON.parse(JSON.stringify(state.builderFigure)) as Figure;
+    figure.color = color;
+    return { builderFigure: figure };
+  }),
+  
+  setBuilderFigureThickness: (thickness) => set((state) => {
+    if (!state.builderFigure) return state;
+    const figure = JSON.parse(JSON.stringify(state.builderFigure)) as Figure;
+    figure.thickness = thickness;
     return { builderFigure: figure };
   }),
   
@@ -476,13 +453,21 @@ export const useStore = create<AppState>((set, get) => ({
     const errors: ValidationError[] = [];
     const figure = state.builderFigure;
     
-    // Collect all pivot IDs
-    const allPivotIds = new Set<string>();
-    const collectPivots = (pivot: Pivot) => {
-      allPivotIds.add(pivot.id);
-      pivot.children.forEach(collectPivots);
-    };
-    collectPivots(figure.root_pivot);
+    // Check if root pivot is designated
+    if (!state.builderRootPivotId) {
+      errors.push({
+        type: 'no-root',
+        message: '루트 피봇을 지정해주세요 (Set Root 사용)'
+      });
+    }
+    
+    // Check if at least one shape exists
+    if (figure.shapes.length === 0) {
+      errors.push({
+        type: 'isolated-pivot',
+        message: '최소 1개 이상의 도형을 만들어야 합니다'
+      });
+    }
     
     // Check for isolated pivots (not in any shape)
     const pivotsInShapes = new Set<string>();
@@ -490,37 +475,73 @@ export const useStore = create<AppState>((set, get) => ({
       shape.pivotIds.forEach(id => pivotsInShapes.add(id));
     });
     
-    allPivotIds.forEach(pivotId => {
-      if (!pivotsInShapes.has(pivotId) && pivotId !== figure.root_pivot.id) {
+    figure.pivots.forEach(pivot => {
+      if (!pivotsInShapes.has(pivot.id)) {
         errors.push({
           type: 'isolated-pivot',
-          pivotId,
-          message: `Pivot ${pivotId} is not connected to any shape`
+          pivotId: pivot.id,
+          message: `피봇 ${pivot.id} 이(가) 어떤 도형과도 연결되지 않았습니다`
         });
       }
     });
+
+    // Check that all pivots used in shapes form a single connected component
+    if (pivotsInShapes.size > 0) {
+      const adj = new Map<string, Set<string>>();
+      const addEdge = (a: string, b: string) => {
+        if (!adj.has(a)) adj.set(a, new Set());
+        if (!adj.has(b)) adj.set(b, new Set());
+        adj.get(a)!.add(b);
+        adj.get(b)!.add(a);
+      };
+
+      figure.shapes.forEach(shape => {
+        const ids = shape.pivotIds;
+        if (shape.type === 'line' && ids.length >= 2) {
+          addEdge(ids[0], ids[1]);
+        } else if (shape.type === 'curve' && ids.length >= 3) {
+          addEdge(ids[0], ids[1]);
+          addEdge(ids[1], ids[2]);
+        } else if (shape.type === 'polygon' && ids.length >= 2) {
+          for (let i = 0; i < ids.length; i++) {
+            const a = ids[i];
+            const b = ids[(i + 1) % ids.length];
+            addEdge(a, b);
+          }
+        }
+      });
+
+      const start = Array.from(pivotsInShapes)[0];
+      const visited = new Set<string>();
+      const dfs = (id: string) => {
+        if (visited.has(id)) return;
+        visited.add(id);
+        adj.get(id)?.forEach(dfs);
+      };
+      dfs(start);
+
+      pivotsInShapes.forEach(id => {
+        if (!visited.has(id)) {
+          errors.push({
+            type: 'isolated-pivot',
+            pivotId: id,
+            message: '모든 선이 하나로 이어지도록 연결해야 합니다'
+          });
+        }
+      });
+    }
     
     // Check for triangles with joint pivots (invalid rigid structure)
     figure.shapes.forEach(shape => {
       if (shape.type === 'polygon' && shape.pivotIds.length === 3) {
-        const findPivotType = (id: string): 'joint' | 'fixed' | null => {
-          let foundType: 'joint' | 'fixed' | null = null;
-          const search = (pivot: Pivot): void => {
-            if (pivot.id === id) {
-              foundType = pivot.type;
-              return;
-            }
-            pivot.children.forEach(search);
-          };
-          search(figure.root_pivot);
-          return foundType;
-        };
-        
-        const hasJoint = shape.pivotIds.some(id => findPivotType(id) === 'joint');
+        const hasJoint = shape.pivotIds.some(id => {
+          const pivot = figure.pivots.find(p => p.id === id);
+          return pivot?.type === 'joint';
+        });
         if (hasJoint) {
           errors.push({
             type: 'invalid-joint',
-            message: `Triangle shape cannot have joint pivots (must be all fixed for rigid structure)`
+            message: '삼각형에는 joint 피봇을 사용할 수 없습니다 (모두 fixed여야 합니다)'
           });
         }
       }
@@ -528,52 +549,6 @@ export const useStore = create<AppState>((set, get) => ({
     
     return { validationErrors: errors };
   }),
-  
-  saveBuilderFigure: (name) => set((state) => {
-    if (!state.builderFigure) return state;
-    
-    const customFigures = JSON.parse(localStorage.getItem('customFigures') || '{}');
-    const figureId = `custom-${Date.now()}`;
-    
-    customFigures[figureId] = {
-      id: figureId,
-      name,
-      figure: state.builderFigure,
-      createdAt: Date.now()
-    };
-    
-    localStorage.setItem('customFigures', JSON.stringify(customFigures));
-    
-    return state;
-  }),
-  
-  loadBuilderFigure: (figureId) => set(() => {
-    const customFigures = JSON.parse(localStorage.getItem('customFigures') || '{}');
-    
-    if (customFigures[figureId]) {
-      return {
-        builderFigure: JSON.parse(JSON.stringify(customFigures[figureId].figure)),
-        selectedPivotIds: [],
-        validationErrors: []
-      };
-    }
-    
-    return {};
-  }),
-  
-  exportBuilderFigure: (name) => {
-    const state = get();
-    if (!state.builderFigure) return;
-    
-    const dataStr = "data:text/json;charset=utf-8," + 
-                    encodeURIComponent(JSON.stringify(state.builderFigure, null, 2));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", `${name}.psfigure`);
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-  },
   
   resetBuilderFigure: () => set({
     builderFigure: null,
@@ -590,21 +565,26 @@ export const useStore = create<AppState>((set, get) => ({
   clearConnectingPivots: () => set({ connectingPivots: [] }),
   
   createLineFromConnecting: () => set((state) => {
-    if (!state.builderFigure || state.connectingPivots.length < 2) return state;
+    if (!state.builderFigure) return state;
+
+    const mode = state.builderTool === 'connect-curve' ? 'curve' : 'line';
+    const need = mode === 'curve' ? 3 : 2;
+    if (state.connectingPivots.length < need) return state;
     
     const figure = JSON.parse(JSON.stringify(state.builderFigure)) as Figure;
-    
-    // Create a line shape connecting the two pivots
-    const newShape: Shape = {
-      type: 'line',
-      pivotIds: [state.connectingPivots[0], state.connectingPivots[1]]
-    };
+    const pivots = state.connectingPivots.slice(0, need);
+
+    const newShape: Shape = mode === 'curve'
+      ? { type: 'curve', pivotIds: pivots }
+      : { type: 'line', pivotIds: pivots.slice(0, 2) };
     
     figure.shapes.push(newShape);
     
-    return {
+    const newState = {
       builderFigure: figure,
       connectingPivots: [] // Clear after creating
     };
+    setTimeout(() => useStore.getState().validateBuilderFigure(), 0);
+    return newState;
   }),
 }));
