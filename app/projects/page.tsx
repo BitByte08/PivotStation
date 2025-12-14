@@ -8,8 +8,13 @@ import { useRouter } from 'next/navigation';
 export default function ProjectsPage() {
   const { loadFromLocalStorage, getAllProjects, deleteProject } = useStore();
   const router = useRouter();
+  const [projects, setProjects] = React.useState<any[]>([]);
 
-  const projects = getAllProjects().sort((a, b) => b.lastModified - a.lastModified);
+  React.useEffect(() => {
+    setProjects(getAllProjects().sort((a, b) => b.lastModified - a.lastModified));
+  }, [getAllProjects]);
+
+  // const projects = getAllProjects().sort((a, b) => b.lastModified - a.lastModified);
 
   const handleProjectClick = (projectId: string) => {
     loadFromLocalStorage(projectId);

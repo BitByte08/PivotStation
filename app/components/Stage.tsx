@@ -5,7 +5,7 @@ import { useStore } from '@/app/store/useStore';
 import { useInteraction } from '@/app/hooks/useInteraction';
 import { useFigureRender } from '@/app/hooks/useFigureRender';
 import { useDragToDelete } from '@/app/hooks/useDragToDelete';
-import ColorPicker from '@/app/components/ColorPicker';
+import FigureSettings from '@/app/components/FigureSettings';
 import { Pivot } from '@/app/types/figure';
 
 export default function Stage() {
@@ -156,11 +156,14 @@ export default function Stage() {
           handleMouseUp();
           handleDeleteMouseUp(0, 0, null);
         }}
-        className="bg-surface shadow-sm"
+        className="bg-surface shadow-sm max-h-[calc(100vh-2rem)] mx-auto"
       >
         {/* Delete Zone - Trash Icon */}
-        <g opacity={isOverDeleteZone ? 1 : 0.4} style={{ transition: 'opacity 0.2s', filter: isOverDeleteZone ? 'drop-shadow(0 0 8px #ef4444)' : 'none' }}>
-          <text x="1230" y="685" textAnchor="middle" fontSize="56" fill="#ef4444">🗑️</text>
+        {/* Delete Zone - Trash Icon (Material) */}
+        <g opacity={isOverDeleteZone ? 1 : 0.5} style={{ transition: 'opacity 0.2s', filter: isOverDeleteZone ? 'drop-shadow(0 0 8px #ef4444)' : 'none', cursor: 'pointer' }}>
+           <svg x="1220" y="660" width="36" height="36" viewBox="0 0 24 24" fill="#ef4444">
+             <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+           </svg>
         </g>
 
         {/* Onion Skinning: Render previous frame if exists and not playing */}
@@ -179,14 +182,8 @@ export default function Stage() {
            </g>
         ))}
       </svg>
-      <div className="absolute top-4 left-4 text-xs text-gray-500">
-        Frame: {currentFrameIndex + 1} / {project.frames.length}
-      </div>
-      <div className="absolute bottom-8 right-8 text-4xl font-bold text-gray-200 pointer-events-none select-none">
-        {currentFrameIndex + 1}
-      </div>
       {pickerState.isOpen && pickerState.figureId && (
-        <ColorPicker 
+        <FigureSettings 
             figureId={pickerState.figureId} 
             onClose={() => setPickerState({ isOpen: false, figureId: null })} 
         />

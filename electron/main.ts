@@ -1,11 +1,34 @@
-// ... existing imports
+import { app, BrowserWindow, ipcMain } from 'electron';
+import path from 'path';
 import { autoUpdater } from 'electron-updater';
-import { ipcMain } from 'electron'; 
 
-// ... existing code
+let mainWindow: BrowserWindow | null = null;
+const isDev = !app.isPackaged;
 
 function createWindow() {
-  // ... existing window creation code
+  mainWindow = new BrowserWindow({
+    width: 1280,
+    height: 720,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
+      contextIsolation: false, // For now, or follow security best practices
+    },
+  });
+
+  const url = isDev
+    ? 'http://localhost:3000'
+    : `file://${path.join(__dirname, '../out/index.html')}`;
+
+  mainWindow.loadURL(url);
+
+  if (isDev) {
+    mainWindow.webContents.openDevTools();
+  }
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
 
   // Auto-updater events
   autoUpdater.on('update-available', () => {
@@ -20,15 +43,13 @@ function createWindow() {
     console.error('Auto-updater error:', err);
   });
   
-  // Check for updates once window is ready and not in dev (unless forced)
+  // Check for updates once window is ready and not in dev
   mainWindow.once('ready-to-show', () => {
       mainWindow?.show();
       if (!isDev) {
         autoUpdater.checkForUpdatesAndNotify();
       }
   });
-
-  // ... 
 }
 
 // IPC handlers for manual check and install
@@ -44,8 +65,16 @@ ipcMain.handle('quit-and-install', () => {
     autoUpdater.quitAndInstall();
 });
 
-
 app.whenReady().then(() => {
-    // ...
+  createWindow();
 
+  app.on('activate', () => {
+    if (mainWindow === null) createWindow();
+  });
+});
 
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});

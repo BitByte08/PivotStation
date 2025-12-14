@@ -106,7 +106,7 @@ export const createCurve = (): Figure => {
       children: [
         {
           id: controlId,
-          type: 'joint',
+          type: 'fixed',
           x: 400,
           y: 250,
           children: [{ id: endId, type: 'joint', x: 450, y: 300, children: [] }],

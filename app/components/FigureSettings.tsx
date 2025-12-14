@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '@/app/store/useStore';
 
-interface ColorPickerProps {
+interface FigureSettingsProps {
   figureId: string;
   onClose: () => void;
 }
 
-export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
+export default function FigureSettings({ figureId, onClose }: FigureSettingsProps) {
   const { project, currentFrameIndex, updateFigure } = useStore();
   const frame = project.frames[currentFrameIndex];
   const figure = frame.figures.find(f => f.id === figureId);
@@ -46,6 +46,14 @@ export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
         updateFigure(currentFrameIndex, newFigure);
         setScale(100); // Reset after applying
     }
+  };
+
+  const updatePivotType = (type: 'joint' | 'fixed') => {
+      if (figure) {
+          const newFigure = { ...figure };
+          newFigure.root_pivot.type = type;
+          updateFigure(currentFrameIndex, newFigure);
+      }
   };
 
   const handleSave = () => {
@@ -138,6 +146,27 @@ export default function ColorPicker({ figureId, onClose }: ColorPickerProps) {
                 적용 (Apply)
             </button>
         </div>
+      </div>
+
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-1">피벗 타입 (Pivot Type)</label>
+        <div className="flex gap-2">
+            <button 
+                onClick={() => updatePivotType('joint')}
+                className={`flex-1 py-1.5 text-sm rounded border ${figure.root_pivot.type === 'joint' ? 'bg-blue-100 border-blue-300 text-blue-700 font-bold' : 'bg-gray-50 border-gray-200 text-gray-600'}`}
+            >
+                관절 (Joint)
+            </button>
+            <button 
+                onClick={() => updatePivotType('fixed')}
+                className={`flex-1 py-1.5 text-sm rounded border ${figure.root_pivot.type === 'fixed' ? 'bg-orange-100 border-orange-300 text-orange-700 font-bold' : 'bg-gray-50 border-gray-200 text-gray-600'}`}
+            >
+                고정 (Fixed)
+            </button>
+        </div>
+        <p className="text-xs text-gray-400 mt-1">
+            * 고정(Fixed): 같은 관절에 연결된 다른 고정 객체들과 함께 움직입니다. (예: 날개, 장식)
+        </p>
       </div>
 
       <div className="flex flex-col gap-2 mt-auto pt-6 border-t">

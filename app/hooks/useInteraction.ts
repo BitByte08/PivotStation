@@ -86,12 +86,7 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
                 const dy = targetY - p.y;
                 
                 if (interactionMode === 'rotate') {
-                    // Rotate Mode:
-                    // If root, move entire figure.
-                    // If child, rotate around parent, keeping length constant.
-                    
                     if (p.id === figureClone.root_pivot.id) {
-                        // Move root and all children
                         p.x = targetX;
                         p.y = targetY;
                         const moveChildren = (parent: Pivot) => {
@@ -103,49 +98,109 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
                         };
                         moveChildren(p);
                     } else {
-                        // Find parent to rotate around
                         const parent = findParent(figureClone.root_pivot, p.id);
                         if (parent) {
-                            // Calculate angles
-                            const currentAngle = Math.atan2(p.y - parent.y, p.x - parent.x);
-                            const targetAngle = Math.atan2(targetY - parent.y, targetX - parent.x);
-                            const deltaAngle = targetAngle - currentAngle;
+                            // 1. Find the Effective Pivot (Nearest Joint)
+                            let effectivePivot: Pivot | null = parent;
+                            let ancestor = p; // The node we will rotate (child of effectivePivot)
+                            let pivot = parent; // The effective pivot
                             
-                            // Helper to rotate a point around a center
-                            const rotatePoint = (point: Pivot, center: Pivot, angle: number) => {
-                                const cos = Math.cos(angle);
-                                const sin = Math.sin(angle);
-                                const dx = point.x - center.x;
-                                const dy = point.y - center.y;
-                                point.x = center.x + dx * cos - dy * sin;
-                                point.y = center.y + dx * sin + dy * cos;
-                            };
+                            // Traverse up - find the proper joint to rotate around
+                            while (effectivePivot && effectivePivot.type === 'fixed' && effectivePivot.id !== figureClone.root_pivot.id) {
+                                const nextParent = findParent(figureClone.root_pivot, effectivePivot.id);
+                                if (!nextParent) break;
+                                ancestor = effectivePivot;
+                                effectivePivot = nextParent;
+                                pivot = nextParent;
+                            }
+                            
+                            if (effectivePivot) {
+                                const currentAngle = Math.atan2(p.y - effectivePivot.y, p.x - effectivePivot.x);
+                                const targetAngle = Math.atan2(targetY - effectivePivot.y, targetX - effectivePivot.x);
+                                const deltaAngle = targetAngle - currentAngle;
+                                
+                                const rotatePoint = (point: Pivot, center: Pivot, angle: number) => {
+                                    const cos = Math.cos(angle);
+                                    const sin = Math.sin(angle);
+                                    const dx = point.x - center.x;
+                                    const dy = point.y - center.y;
+                                    point.x = center.x + dx * cos - dy * sin;
+                                    point.y = center.y + dx * sin + dy * cos;
+                                };
 
-                            // Rotate p (the dragged pivot)
-                            rotatePoint(p, parent, deltaAngle);
-                            
-                            // Rotate all descendants around the SAME parent (Rigid Body Rotation)
-                            // Actually, if we rotate p around parent, and we want C to move with p...
-                            // If C is attached to p, and p rotates around parent...
-                            // Then C also rotates around parent by the same angle.
-                            // Yes, the whole subtree rotates around the parent.
-                            
-                            const rotateChildren = (subRoot: Pivot) => {
-                                for (const child of subRoot.children) {
-                                    rotatePoint(child, parent, deltaAngle);
-                                    rotateChildren(child);
+                                // Define rotateChildren inside this scope to be usable by all blocks
+                                const rotateChildren = (subRoot: Pivot, center: Pivot, angle: number) => {
+                                    for (const child of subRoot.children) {
+                                        rotatePoint(child, center, angle);
+                                        rotateChildren(child, center, angle);
+                                    }
+                                };
+                                
+                                // Standard Rotation (move p around immediate parent)
+                                // We do this first so 'p' tries to follow the mouse immediately.
+                                rotatePoint(p, parent, deltaAngle);
+                                rotateChildren(p, parent, deltaAngle);
+
+                                // Robust Rigid Group Rotation Logic
+                                if (pivot.id !== parent.id) {
+                                     // Case: Chained Fixed Nodes (e.g. Tip of a Wing)
+                                     // The logic above moved 'p' relative to its immediate fixed parent.
+                                     // But likely the user wants the WHOLE rigid structure (wing) to rotate around the Joint (pivot).
+                                     
+                                     // 1. Undo the local rotation to reset 'p' and its children
+                                     rotatePoint(p, parent, -deltaAngle);
+                                     rotateChildren(p, parent, -deltaAngle);
+                                     
+                                     // 2. Calculate Angle for the GROUP around PIVOT
+                                     // We want 'p' to reach the Mouse Target, but rotating around PIVOT.
+                                     const angleNow = Math.atan2(p.y - pivot.y, p.x - pivot.x);
+                                     const angleTarget = Math.atan2(targetY - pivot.y, targetX - pivot.x);
+                                     const groupDelta = angleTarget - angleNow;
+                                     
+                                     // 3. Rotate 'ancestor' (the root of this fixed chain attached to Pivot)
+                                     // This moves 'ancestor' and, via recursion, 'p'.
+                                     rotatePoint(ancestor, pivot, groupDelta);
+                                     rotateChildren(ancestor, pivot, groupDelta);
+
+                                     // 4. CRITICAL: Rotate ALL OTHER Fixed siblings of 'ancestor'.
+                                     // This ensures that if the object is branching (Hand with fingers),
+                                     // dragging one finger rotates the whole hand.
+                                     pivot.children.forEach(sibling => {
+                                        if (sibling.id !== ancestor.id && sibling.type === 'fixed') {
+                                            rotatePoint(sibling, pivot, groupDelta);
+                                            rotateChildren(sibling, pivot, groupDelta);
+                                        }
+                                     });
+                                } else {
+                                     // Case: Sibling Fixed Nodes (e.g. Decorations on a bone, or Fan shape)
+                                     // 'parent' IS 'pivot'. 'p' moved correctly around 'pivot'.
+                                     // We just need to ensure other Fixed siblings move WITH 'p'.
+                                     const isDraggedFixed = p.type === 'fixed';
+                                     if (isDraggedFixed) {
+                                         pivot.children.forEach(sibling => {
+                                            // Rotate siblings that are also Fixed (Rigid Group)
+                                            if (sibling.id !== p.id && sibling.type === 'fixed') {
+                                                rotatePoint(sibling, pivot, deltaAngle);
+                                                rotateChildren(sibling, pivot, deltaAngle);
+                                            }
+                                         });
+                                     }
                                 }
-                            };
-                            rotateChildren(p);
+                                
+                                // Case: Dragging a Joint moves its Fixed Decorations
+                                if (p.type === 'joint') {
+                                    pivot.children.forEach(sibling => {
+                                        if (sibling.id !== p.id && sibling.type === 'fixed') {
+                                            rotatePoint(sibling, pivot, deltaAngle);
+                                            rotateChildren(sibling, pivot, deltaAngle);
+                                        }
+                                    });
+                                }
+                            }
                         }
                     }
                 } else if (interactionMode === 'stretch') {
-                    // Stretch Mode:
-                    // If root, move entire figure (same as rotate).
-                    // If child, move freely (changing length).
-                    
                     if (p.id === figureClone.root_pivot.id) {
-                         // Move root and all children
                         p.x = targetX;
                         p.y = targetY;
                         const moveChildren = (parent: Pivot) => {
@@ -157,12 +212,8 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
                         };
                         moveChildren(p);
                     } else {
-                        // Move freely
                         p.x = targetX;
                         p.y = targetY;
-                        
-                        // In Stretch mode, we do NOT move children. 
-                        // They stay where they are, effectively "stretching" the bone connecting to them.
                     }
                 }
 

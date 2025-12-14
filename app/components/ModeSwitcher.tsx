@@ -54,13 +54,6 @@ const IconCrossArrows = () => (
     </svg>
 );
 
-const IconCursor = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" />
-        <path d="M13 13l6 6" />
-    </svg>
-);
-
 const IconSettings = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="3" />
@@ -68,8 +61,29 @@ const IconSettings = () => (
     </svg>
 );
 
+const IconDuplicate = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+);
+
+const IconEye = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+        <circle cx="12" cy="12" r="3" />
+    </svg>
+);
+
+const IconEyeOff = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+        <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+);
+
 export default function ModeSwitcher() {
-  const { interactionMode, setInteractionMode, togglePlay, isPlaying } = useStore();
+  const { interactionMode, setInteractionMode, togglePlay, isPlaying, addFrame, toggleUiVisible, uiVisible } = useStore();
   const { openModalType } = useModal();
 
   const modes = [
@@ -79,7 +93,7 @@ export default function ModeSwitcher() {
   ] as const;
 
   return (
-    <div className="flex-1 flex flex-col bg-surface rounded-2xl p-3 gap-2 shadow-sm">
+    <div className={`flex flex-col bg-surface rounded-2xl p-3 gap-2 shadow-sm transition-all duration-300`}>
       {/* Mode Buttons */}
       {modes.map((mode) => (
         <button
@@ -109,6 +123,14 @@ export default function ModeSwitcher() {
 
       <button
         className='w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100/50 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors'
+        onClick={addFrame}
+        title="프레임 추가 (Add Frame)"
+      >
+        <IconDuplicate />
+      </button>
+
+      <button
+        className='w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100/50 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors'
         onClick={()=>openModalType('models')}
         title="모델 추가"
       >
@@ -121,6 +143,15 @@ export default function ModeSwitcher() {
         title="설정"
       >
         <IconSettings />
+      </button>
+
+      {/* UI Toggle - Always Visible */}
+      <button
+        className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors ${!uiVisible ? 'bg-gray-800 text-white opacity-50 hover:opacity-100' : 'bg-gray-100/50 text-gray-600 hover:bg-gray-200 hover:text-gray-900'}`}
+        onClick={toggleUiVisible}
+        title={uiVisible ? "UI 숨기기 (Hide UI)" : "UI 보이기 (Show UI)"}
+      >
+        {uiVisible ? <IconEye /> : <IconEyeOff />}
       </button>
     </div>
   );

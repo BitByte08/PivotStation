@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Project, Frame, Figure } from '../types';
+import { Project, Frame, Figure } from '@/app/types';
 
 interface AppState {
   project: Project;
@@ -11,8 +11,10 @@ interface AppState {
   holdThreshold: number; // 0 to 1
   interactionMode: 'rotate' | 'stretch' | 'flip';
   globalThickness: number;
+  uiVisible: boolean; // New state
 
   // Actions
+  toggleUiVisible: () => void; // New action
   setGlobalThickness: (thickness: number) => void;
   setInteractionMode: (mode: 'rotate' | 'stretch' | 'flip') => void;
   setProject: (project: Project) => void;
@@ -55,7 +57,9 @@ export const useStore = create<AppState>((set, get) => ({
   holdThreshold: 0.5,
   interactionMode: 'rotate',
   globalThickness: 4,
+  uiVisible: true,
 
+  toggleUiVisible: () => set((state) => ({ uiVisible: !state.uiVisible })),
   setGlobalThickness: (thickness) => set({ globalThickness: thickness }),
   setInteractionMode: (mode) => set({ interactionMode: mode }),
   setProject: (project) => set({ project }),
