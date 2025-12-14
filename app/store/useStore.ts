@@ -205,6 +205,13 @@ export const useStore = create<AppState>((set, get) => ({
       // Deep copy figures for new frame
       figures: JSON.parse(JSON.stringify(lastFrame.figures))
     };
+
+    // Auto-save after adding frame
+    setTimeout(() => {
+      const currentState = useStore.getState();
+      currentState.saveToLocalStorage();
+    }, 300);
+
     return {
       project: {
         ...state.project,
@@ -236,6 +243,12 @@ export const useStore = create<AppState>((set, get) => ({
     
     newFrames[frameIndex] = frame;
 
+    // Auto-save after updating figure (debounced)
+    setTimeout(() => {
+      const currentState = useStore.getState();
+      currentState.saveToLocalStorage();
+    }, 500);
+
     return {
       project: {
         ...state.project,
@@ -244,7 +257,15 @@ export const useStore = create<AppState>((set, get) => ({
     };
   }),
 
-  togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
+  togglePlay: () => set((state) => {
+    // Auto-save when toggling play
+    const newState = { isPlaying: !state.isPlaying };
+    setTimeout(() => {
+      const currentState = useStore.getState();
+      currentState.saveToLocalStorage();
+    }, 0);
+    return newState;
+  }),
   
   // Builder actions
   initBuilderFigure: () => set({

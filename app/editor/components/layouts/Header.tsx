@@ -6,8 +6,13 @@ import { useModal } from '@/app/editor/store/useModal';
 
 const EditorHeader: React.FC = () => {
 	const router = useRouter();
-	const { addFrame, togglePlay, isPlaying } = useStore();
+	const { saveToLocalStorage, project } = useStore();
 	const { openModalType, closeModal } = useModal();
+
+	const handleSave = () => {
+		saveToLocalStorage();
+		alert(`'${project.name}' 프로젝트가 저장되었습니다!`);
+	};
 
 	return (
 		<header className="h-14 w-full flex bg-surface p-3 items-center rounded-2xl justify-between shadow-sm">
@@ -25,6 +30,12 @@ const EditorHeader: React.FC = () => {
 				<div className="h-full w-px bg-gray-300 mx-2" />
 			</div>
 			<nav>
+				<button 
+					onClick={handleSave}
+					className="px-3 py-1.5 bg-green-600 text-white rounded-md font-medium text-sm hover:bg-green-700 transition-colors mr-2"
+				>
+					저장
+				</button>
 				<button 
 					onClick={() => openModalType('export')}
 					className="px-3 py-1.5 bg-background rounded-md font-medium text-sm hover:bg-gray-100 transition-colors"

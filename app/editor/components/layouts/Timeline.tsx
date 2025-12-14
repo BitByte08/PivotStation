@@ -65,8 +65,15 @@ const Timeline: React.FC = () => {
         setContextMenu(null);
       }
     };
+    const handleContextMenu = () => {
+      // Don't close on context menu event
+    };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('contextmenu', handleContextMenu);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('contextmenu', handleContextMenu);
+    };
   }, []);
 
   // Handle jump input
@@ -112,6 +119,7 @@ const Timeline: React.FC = () => {
 
   const handleFrameRightClick = (e: React.MouseEvent, frameIndex: number) => {
     e.preventDefault();
+    e.stopPropagation();
     setContextMenu({ x: e.clientX, y: e.clientY, frameIndex });
   };
 
