@@ -1,14 +1,17 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '@/app/store/useStore';
 import { createStickman, createSimpleStick, createCurve, createCircle } from '@/app/models/figures';
 import useModal from '@/app/editor/store/useModal';
 import ModalContainer from '@/app/components/containers/ModalContainer';
+import CustomFiguresModal from './CustomFiguresModal';
+import { Figure } from '@/app/types';
 
 export default function ModelsModal() {
   const { updateFigure, currentFrameIndex } = useStore();
   const { closeModal } = useModal();
+  const [showCustomFigures, setShowCustomFigures] = useState(false);
 
   const handleSelect = (type: 'stickman' | 'simple' | 'curve' | 'circle') => {
     let figure;
@@ -29,6 +32,25 @@ export default function ModelsModal() {
     updateFigure(currentFrameIndex, figure);
     closeModal();
   };
+  
+  const handleCustomFigureSelect = (figure: Figure) => {
+    // Generate new ID for the figure instance
+    const newFigure = {
+      ...figure,
+      id: `figure-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    };
+    updateFigure(currentFrameIndex, newFigure);
+    closeModal();
+  };
+
+  if (showCustomFigures) {
+    return (
+      <CustomFiguresModal
+        onClose={() => setShowCustomFigures(false)}
+        onSelectFigure={handleCustomFigureSelect}
+      />
+    );
+  }
 
   return (
     <ModalContainer>
@@ -38,6 +60,22 @@ export default function ModelsModal() {
           <button onClick={closeModal} className="text-foreground/50 hover:text-foreground transition-colors">✕</button>
         </div>
         <div className="p-4 flex flex-col gap-3 flex-1 overflow-auto">
+          {/* Custom Figures Button */}
+          <button 
+            onClick={() => setShowCustomFigures(true)} 
+            className="p-4 border-2 border-purple-500 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors flex items-center gap-3 text-foreground"
+          >
+            <div className="w-12 h-12 bg-purple-500 text-white rounded-lg flex items-center justify-center text-xl font-bold">
+              ★
+            </div>
+            <div className="text-left">
+              <div className="text-sm font-medium text-purple-700">커스텀 피규어 (Custom Figures)</div>
+              <div className="text-xs text-purple-600">저장된 커스텀 피규어 불러오기</div>
+            </div>
+          </button>
+          
+          <div className="border-t border-foreground/10 my-2"></div>
+          
           <button onClick={() => handleSelect('stickman')} className="p-4 border border-foreground/20 rounded-lg bg-background hover:border-foreground/40 transition-colors flex items-center gap-3 text-foreground">
             <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">🕴</div>
             <div className="text-left">

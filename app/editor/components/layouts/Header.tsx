@@ -1,16 +1,27 @@
 'use client';
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { useStore } from '@/app/store/useStore';
 import { useModal } from '@/app/editor/store/useModal';
 
 const EditorHeader: React.FC = () => {
+	const router = useRouter();
 	const { addFrame, togglePlay, isPlaying } = useStore();
 	const { openModalType, closeModal } = useModal();
 
 	return (
 		<header className="h-14 w-full flex bg-surface p-3 items-center rounded-2xl justify-between shadow-sm">
-			<div className='flex h-full'>
-				<span className="font-bold text-lg text-foreground">Pivot Animator</span>
+			<div className='flex h-full items-center gap-3'>
+				<button 
+					onClick={() => router.push('/')}
+					className="flex items-center justify-center p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+					title="홈으로"
+				>
+					<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+					</svg>
+				</button>
+				<span className="font-bold text-lg text-foreground">PivotStation</span>
 				<div className="h-full w-px bg-gray-300 mx-2" />
 			</div>
 			<nav>

@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 
 const UpdateNotification = () => {
@@ -5,19 +7,34 @@ const UpdateNotification = () => {
     const [updateDownloaded, setUpdateDownloaded] = useState(false);
 
     useEffect(() => {
-        if (typeof window !== 'undefined' && window.electron) {
-            window.electron.ipcRenderer.on('update-available', () => {
-                setUpdateAvailable(true);
-            });
-            window.electron.ipcRenderer.on('update-downloaded', () => {
-                setUpdateDownloaded(true);
-            });
+        if (typeof window !== 'undefined') {
+            // Check if we're in Electron environment
+            const isElectron = !!(window as any).electronAPI;
+            
+            if (isElectron) {
+                // Listen for update-available event from main process
+                if ((window as any).electron?.ipcRenderer) {
+                    (window as any).electron.ipcRenderer.on('update-available', () => {
+                        console.log('Update available');
+                        setUpdateAvailable(true);
+                    });
+                    (window as any).electron.ipcRenderer.on('update-downloaded', () => {
+                        console.log('Update downloaded');
+                        setUpdateDownloaded(true);
+                        setUpdateAvailable(false);
+                    });
+                    
+                    // Check for updates on startup
+                    (window as any).electron.ipcRenderer.invoke('check-for-updates')
+                        .catch((err: any) => console.log('Update check skipped (dev mode)', err));
+                }
+            }
         }
     }, []);
 
     const handleUpdate = () => {
-        if (window.electron) {
-            window.electron.ipcRenderer.invoke('quit-and-install');
+        if ((window as any).electron?.ipcRenderer) {
+            (window as any).electron.ipcRenderer.invoke('quit-and-install');
         }
     };
 
@@ -54,3 +71,4 @@ const UpdateNotification = () => {
 };
 
 export default UpdateNotification;
+

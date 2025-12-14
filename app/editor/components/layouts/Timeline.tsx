@@ -5,13 +5,15 @@ import { useStore } from '@/app/store/useStore';
 interface TimelineButtonProps {
   children?: React.ReactNode;
   onClick?: () => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
   className?: string;
   active?: boolean;
 }
 
-const TimelineButton: React.FC<TimelineButtonProps> = ({children, onClick, className, active}) => (
+const TimelineButton: React.FC<TimelineButtonProps> = ({children, onClick, onContextMenu, className, active}) => (
   <div 
-    onClick={onClick} 
+    onClick={onClick}
+    onContextMenu={onContextMenu}
     className={`
         min-w-[3.5rem] h-[80%] rounded-md flex items-center justify-center cursor-pointer shrink-0 
         transition-all text-sm font-medium border overflow-hidden
@@ -39,6 +41,8 @@ const Timeline: React.FC = () => {
   const { project, currentFrameIndex, setCurrentFrameIndex, addFrame, interpolatingTargetIndex } = useStore();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [jumpInput, setJumpInput] = useState<string>('');
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; frameIndex: number } | null>(null);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to current frame
   useEffect(() => {
@@ -54,6 +58,17 @@ const Timeline: React.FC = () => {
     }
   }, [currentFrameIndex]);
 
+  // Close context menu on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
+        setContextMenu(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // Handle jump input
   const handleJump = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -68,6 +83,36 @@ const Timeline: React.FC = () => {
   const handleAddFrame = () => {
       addFrame();
       // Scroll will happen automatically via useEffect
+  };
+
+  const handleDuplicateFrame = (frameIndex: number) => {
+    const sourceFigures = JSON.parse(JSON.stringify(project.frames[frameIndex].figures));
+    const newFrame = {
+      id: `frame-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      figures: sourceFigures
+    };
+    const updatedFrames = [...project.frames];
+    updatedFrames.splice(frameIndex + 1, 0, newFrame);
+    useStore.setState({ project: { ...project, frames: updatedFrames } });
+    setContextMenu(null);
+  };
+
+  const handleDeleteFrame = (frameIndex: number) => {
+    if (project.frames.length === 1) {
+      alert('최소 1개 이상의 프레임이 필요합니다.');
+      return;
+    }
+    const updatedFrames = project.frames.filter((_, i) => i !== frameIndex);
+    useStore.setState({ project: { ...project, frames: updatedFrames } });
+    if (currentFrameIndex >= updatedFrames.length) {
+      setCurrentFrameIndex(updatedFrames.length - 1);
+    }
+    setContextMenu(null);
+  };
+
+  const handleFrameRightClick = (e: React.MouseEvent, frameIndex: number) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, frameIndex });
   };
 
   return (
@@ -112,6 +157,7 @@ const Timeline: React.FC = () => {
                <TimelineButton 
                  key={frame.id}
                  onClick={() => setCurrentFrameIndex(index)}
+                 onContextMenu={(e) => handleFrameRightClick(e, index)}
                  active={isCurrent}
                >
                  <div className="flex flex-col items-center">
@@ -133,6 +179,28 @@ const Timeline: React.FC = () => {
             </svg>
         </TimelineButton>
       </div>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <div
+          ref={contextMenuRef}
+          className="fixed bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1"
+          style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
+        >
+          <button
+            onClick={() => handleDuplicateFrame(contextMenu.frameIndex)}
+            className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            프레임 복제
+          </button>
+          <button
+            onClick={() => handleDeleteFrame(contextMenu.frameIndex)}
+            className="w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-red-50 transition-colors border-t border-gray-100"
+          >
+            프레임 삭제
+          </button>
+        </div>
+      )}
     </footer>
   );
 };
