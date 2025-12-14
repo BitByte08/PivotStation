@@ -270,7 +270,7 @@ export default function Stage() {
         ref={svgRef}
         viewBox="0 0 1280 720"
         onClick={editorMode === 'figure' ? handleBuilderClick : undefined}
-        onMouseMove={useCallback((e) => {
+        onMouseMove={useCallback((e: React.MouseEvent<SVGSVGElement>) => {
           if (editorMode === 'figure' && builderDraggingPivotId && svgRef.current) {
             const CTM = svgRef.current.getScreenCTM();
             if (CTM) {
@@ -288,7 +288,7 @@ export default function Stage() {
             handleMouseMove(e);
           }
         }, [editorMode, builderDraggingPivotId, builderDragOffset, draggingPivotId, handleMouseMove, handleDeleteMouseMove, moveBuilderPivot])}
-        onMouseUp={useCallback((e) => {
+        onMouseUp={useCallback((e: React.MouseEvent<SVGSVGElement>) => {
           if (editorMode === 'figure' && builderDraggingPivotId) {
             setBuilderDraggingPivotId(null);
           } else if (svgRef.current && draggingPivotId) {

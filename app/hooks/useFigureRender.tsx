@@ -9,14 +9,14 @@ export const useFigureRender = () => {
   const buildHierarchy = (pivots: Pivot[], parentMap: Record<string, string | null>, rootPivotId: string): Pivot | null => {
     if (!rootPivotId || !pivots.length) return null;
     
-    const pivotMap = new Map(pivots.map(p => [p.id, { ...p, children: [] }]));
+    const pivotMap = new Map(pivots.map(p => [p.id, { ...p, children: [] as Pivot[] }]));
     
     // Build parent-child relationships
     for (const [childId, parentId] of Object.entries(parentMap)) {
       if (parentId && pivotMap.has(childId) && pivotMap.has(parentId)) {
         const parent = pivotMap.get(parentId)!;
         const child = pivotMap.get(childId)!;
-        parent.children!.push(child);
+        (parent.children as Pivot[]).push(child);
       }
     }
     
@@ -128,7 +128,7 @@ export const useFigureRender = () => {
           cursor="pointer"
           onMouseDown={(e) => onMouseDown(e, pivot, isRoot)}
         />
-        {pivot.children.map(child => renderPivot(child, draggingPivotId, onMouseDown, false))}
+        {pivot.children?.map(child => renderPivot(child, draggingPivotId, onMouseDown, false))}
       </g>
     );
   };

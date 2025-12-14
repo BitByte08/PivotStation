@@ -1,13 +1,15 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useStore } from '@/app/store/useStore';
 import { useRouter } from 'next/navigation';
 import UpdateNotification from '@/app/components/UpdateNotification';
+import NewProjectModal from '@/app/components/NewProjectModal';
 
 export default function Home() {
   const projectFileInputRef = useRef<HTMLInputElement>(null);
-  const { setProject } = useStore();
+  const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
+  const { setProject, setProjectName, setProjectDescription } = useStore();
   const router = useRouter();
 
   const handleProjectFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,6 +30,13 @@ export default function Home() {
     reader.readAsText(file);
   };
 
+  const handleNewProject = (name: string, description: string) => {
+    setProjectName(name);
+    setProjectDescription(description);
+    setIsNewProjectModalOpen(false);
+    router.push('/editor');
+  };
+
   return (
     <div className="flex flex-col justify-center py-20 px-40">
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
@@ -35,9 +44,9 @@ export default function Home() {
       </div>
 
       <div className="text-left flex flex-col gap-4">
-        <a
-          href="/editor/"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
+        <button
+          onClick={() => setIsNewProjectModalOpen(true)}
+          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30 text-left"
         >
           <h2 className={`mb-3 text-2xl font-semibold`}>
             {"> " }새로운 프로젝트
@@ -45,7 +54,7 @@ export default function Home() {
           <p className={`m-0 text-sm opacity-50`}>
             새로운 애니메이션 프로젝트를 생성해요.
           </p>
-        </a>
+        </button>
         
         <a
           href="/projects/"
@@ -79,6 +88,13 @@ export default function Home() {
           style={{ display: 'none' }}
         />
       </div>
+      
+      <NewProjectModal 
+        isOpen={isNewProjectModalOpen}
+        onClose={() => setIsNewProjectModalOpen(false)}
+        onConfirm={handleNewProject}
+      />
+      
       <UpdateNotification />
     </div>
   );

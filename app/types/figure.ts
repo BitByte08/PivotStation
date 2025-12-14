@@ -13,6 +13,7 @@ export interface Pivot {
   y: number;
   customColor?: string;
   hidden?: boolean;
+  children?: Pivot[];  // For hierarchical rendering
 }
 
 export interface Figure {
