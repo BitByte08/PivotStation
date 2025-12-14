@@ -67,12 +67,12 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-20 px-4">
+    <div className="flex flex-col justify-center py-20 px-40">
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
         <h1 className="text-4xl font-bold mb-8">Pivot Station</h1>
       </div>
 
-      <div className="mb-32 flex flex-col text-center lg:max-w-md lg:text-left gap-4">
+      <div className="text-left flex flex-col gap-4">
         <a
           href="/editor/"
           className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
