@@ -2,18 +2,37 @@
 
 import Stage from '@/app/components/Stage';
 import ModeSwitcher from '@/app/components/ModeSwitcher';
-import ExportModal from '@/app/editor/components/modals/ExportModal';
-import SettingsModal from '@/app/editor/components/modals/SettingsModal';
-import ModelsModal from '@/app/editor/components/modals/ModelsModal';
-import Header from './components/layouts/Header';
-import Timeline from './components/layouts/Timeline';
-import { useModal } from './store/useModal';
-import { useEffect } from 'react';
+import BuilderToolbar from './components/layouts/BuilderToolbar';
+import BuilderSidebar from './components/layouts/BuilderSidebar';
+import { useStore } from '@/app/store/useStore';
+import { useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-export default function EditorPage() {
-  const { closeModal } = useModal();
+function EditorContent() {
+  const { setEditorMode, editorMode, initBuilderFigure } = useStore();
+  const searchParams = useSearchParams();
+  
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    if (mode === 'figure') {
+      setEditorMode('figure');
+      initBuilderFigure();
+    } else {
+      setEditorMode('anime');
+    }
+  }, [searchParams, setEditorMode, initBuilderFigure]);
+  
   return <>
-      <ModeSwitcher />
+      {editorMode === 'anime' ? <ModeSwitcher /> : <BuilderToolbar />}
+      {editorMode === 'figure' && <BuilderSidebar />}
       <Stage />
     </>;
+}
+
+export default function EditorPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EditorContent />
+    </Suspense>
+  );
 }
