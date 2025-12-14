@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useStore } from '@/app/store/useStore';
-import useModal from '@/app/editor/store/useModal';
+import { useModal } from '@/app/editor/store/useModal';
 
 import { VideoGenerator } from '@/app/utils/ffmpeg';
 import ModalContainer from '@/app/components/containers/ModalContainer';

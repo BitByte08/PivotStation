@@ -55,7 +55,7 @@ export class VideoGenerator {
     const renderPivot = (pivot: Pivot, isRoot: boolean, color: string) => {
         if (pivot.hidden) return ''; 
         let svg = `<circle cx="${pivot.x}" cy="${pivot.y}" r="${isRoot ? 6 : 4}" fill="${color}" />`;
-        for (const child of pivot.children) {
+        for (const child of pivot.children || []) {
             svg += renderPivot(child, false, 'red'); 
         }
         return svg;
@@ -68,7 +68,7 @@ export class VideoGenerator {
         const allPivots = new Map<string, Pivot>();
         const collectPivots = (p: Pivot) => {
             allPivots.set(p.id, p);
-            p.children.forEach(collectPivots);
+            (p.children || []).forEach(collectPivots);
         };
         collectPivots(figure.root_pivot);
 

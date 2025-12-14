@@ -29,11 +29,11 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
            
            const flipRecursive = (p: Pivot) => {
                p.x = rootX - (p.x - rootX);
-               p.children.forEach(flipRecursive);
+               p.children?.forEach(flipRecursive);
            };
            
            // Flip children, root stays (or effectively flips in place)
-           newFigure.root_pivot.children.forEach(flipRecursive);
+           newFigure.root_pivot.children?.forEach(flipRecursive);
            updateFigure(currentFrameIndex, newFigure);
        }
       return;
@@ -72,8 +72,8 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
         
         // Helper to find parent of a pivot
         const findParent = (root: Pivot, targetId: string): Pivot | null => {
-            if (root.children.some(c => c.id === targetId)) return root;
-            for (const child of root.children) {
+            if (root.children?.some(c => c.id === targetId)) return root;
+            for (const child of root.children || []) {
                 const found = findParent(child, targetId);
                 if (found) return found;
             }
@@ -90,7 +90,7 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
                         p.x = targetX;
                         p.y = targetY;
                         const moveChildren = (parent: Pivot) => {
-                            for (const child of parent.children) {
+                            for (const child of parent.children || []) {
                                 child.x += dx;
                                 child.y += dy;
                                 moveChildren(child);
@@ -130,7 +130,7 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
 
                                 // Define rotateChildren inside this scope to be usable by all blocks
                                 const rotateChildren = (subRoot: Pivot, center: Pivot, angle: number) => {
-                                    for (const child of subRoot.children) {
+                                    for (const child of subRoot.children || []) {
                                         rotatePoint(child, center, angle);
                                         rotateChildren(child, center, angle);
                                     }
@@ -165,7 +165,7 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
                                      // 4. CRITICAL: Rotate ALL OTHER Fixed siblings of 'ancestor'.
                                      // This ensures that if the object is branching (Hand with fingers),
                                      // dragging one finger rotates the whole hand.
-                                     pivot.children.forEach(sibling => {
+                                     pivot.children?.forEach(sibling => {
                                         if (sibling.id !== ancestor.id && sibling.type === 'fixed') {
                                             rotatePoint(sibling, pivot, groupDelta);
                                             rotateChildren(sibling, pivot, groupDelta);
@@ -177,7 +177,7 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
                                      // We just need to ensure other Fixed siblings move WITH 'p'.
                                      const isDraggedFixed = p.type === 'fixed';
                                      if (isDraggedFixed) {
-                                         pivot.children.forEach(sibling => {
+                                         pivot.children?.forEach(sibling => {
                                             // Rotate siblings that are also Fixed (Rigid Group)
                                             if (sibling.id !== p.id && sibling.type === 'fixed') {
                                                 rotatePoint(sibling, pivot, deltaAngle);
@@ -189,7 +189,7 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
                                 
                                 // Case: Dragging a Joint moves its Fixed Decorations
                                 if (p.type === 'joint') {
-                                    pivot.children.forEach(sibling => {
+                                    pivot.children?.forEach(sibling => {
                                         if (sibling.id !== p.id && sibling.type === 'fixed') {
                                             rotatePoint(sibling, pivot, deltaAngle);
                                             rotateChildren(sibling, pivot, deltaAngle);
@@ -204,7 +204,7 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
                         p.x = targetX;
                         p.y = targetY;
                         const moveChildren = (parent: Pivot) => {
-                            for (const child of parent.children) {
+                            for (const child of parent.children || []) {
                                 child.x += dx;
                                 child.y += dy;
                                 moveChildren(child);
@@ -219,7 +219,7 @@ export const useInteraction = (svgRef: React.RefObject<SVGSVGElement | null>) =>
 
                 return true;
             }
-            for (const child of p.children) {
+            for (const child of p.children || []) {
                 if (updatePivotRecursive(child)) return true;
             }
             return false;

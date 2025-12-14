@@ -1,7 +1,7 @@
 'use client';
 import ModalContainer from '@/app/components/containers/ModalContainer';
 import { useStore } from '@/app/store/useStore';
-import useModal from '../../store/useModal';
+import { useModal } from '../../store/useModal';
 
 export default function SettingsModal() {
   const { 

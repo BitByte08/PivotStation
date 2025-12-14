@@ -3,9 +3,6 @@ export type ShapeType = 'line' | 'circle' | 'polygon' | 'curve';
 export interface Shape {
   type: ShapeType;
   color?: string;
-  // For circle: radius or diameter defined by pivots?
-  // For polygon: list of pivot IDs to connect
-  // For curve: 3 pivot IDs (start, control, end)
   pivotIds: string[];
 }
 
@@ -14,30 +11,35 @@ export interface Pivot {
   type: 'joint' | 'fixed';
   x: number;
   y: number;
-  children: Pivot[];
-  // Visual properties can be determined by mode, but we might need to store custom colors if the user picks them
   customColor?: string;
-  hidden?: boolean; // If true, this pivot is not selectable/visible
+  hidden?: boolean;
+  children?: Pivot[];  // For hierarchical rendering
 }
 
 export interface Figure {
   id: string;
-  root_pivot: Pivot;
-  shapes: Shape[]; // New: Shapes defined by pivots
-  color?: string; // Global figure color
-  opacity?: number; // Global figure opacity
-  thickness?: number; // Global stick thickness
+  pivots: Pivot[];           // Flat list of all pivots
+  parentMap: Record<string, string | null>;  // pivotId -> parentId (null means top-level)
+  shapes: Shape[];
+  color?: string;
+  opacity?: number;
+  thickness?: number;
+  root_pivot?: any;          // Deprecated, kept for backward compat
 }
 
 // Helper functions for figure operations
 export const createEmptyFigure = (id: string): Figure => ({
   id,
-  root_pivot: {
-    id: 'root',
-    type: 'fixed',
-    x: 0,
-    y: 0,
-    children: [],
+  pivots: [
+    {
+      id: `pivot-${Date.now()}`,
+      type: 'fixed',
+      x: 0,
+      y: 0,
+    }
+  ],
+  parentMap: {
+    [`pivot-${Date.now()}`]: null
   },
   shapes: [],
   color: '#000000',

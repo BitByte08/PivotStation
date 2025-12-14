@@ -1,4 +1,21 @@
-import { Figure } from '@/app/types/figure';
+import { Figure, Pivot, Shape } from '@/app/types/figure';
+
+// Helper to convert hierarchical root_pivot into flat pivots + parentMap
+const buildFlat = (root: Pivot): { pivots: Pivot[]; parentMap: Record<string, string | null> } => {
+  const pivots: Pivot[] = [];
+  const parentMap: Record<string, string | null> = {};
+
+  const walk = (node: Pivot, parentId: string | null) => {
+    const { children, ...rest } = node;
+    // push node (preserve optional children for runtime renderers)
+    pivots.push({ ...rest, children });
+    parentMap[node.id] = parentId;
+    (children || []).forEach(child => walk(child, node.id));
+  };
+
+  walk(root, null);
+  return { pivots, parentMap };
+};
 
 export const createStickman = (): Figure => {
   const hipId = `p-${Date.now()}-hip`;
@@ -14,9 +31,7 @@ export const createStickman = (): Figure => {
   const rFootId = `p-${Date.now()}-rf`;
 
   // Each segment: 40 units (45-degree angles for consistency)
-  return {
-    id: `fig-${Date.now()}`,
-    root_pivot: {
+  const root_pivot: Pivot = {
       id: hipId,
       type: 'joint',
       x: 400,
@@ -60,8 +75,8 @@ export const createStickman = (): Figure => {
           children: [{ id: rFootId, type: 'joint', x: 436, y: 446, children: [] }],
         },
       ],
-    },
-    shapes: [
+    };
+  const shapes: Shape[] = [
       { type: 'line', pivotIds: [hipId, shoulderId] },
       { type: 'circle', pivotIds: [shoulderId, headTopId] },
       { type: 'line', pivotIds: [shoulderId, lElbowId] },
@@ -72,33 +87,31 @@ export const createStickman = (): Figure => {
       { type: 'line', pivotIds: [lKneeId, lFootId] },
       { type: 'line', pivotIds: [hipId, rKneeId] },
       { type: 'line', pivotIds: [rKneeId, rFootId] },
-    ],
-  };
+    ];
+  const { pivots, parentMap } = buildFlat(root_pivot);
+  return { id: `fig-${Date.now()}`, root_pivot, shapes, pivots, parentMap };
 };
 
 export const createSimpleStick = (): Figure => {
   const rootId = `p-${Date.now()}-root`;
   const endId = `p-${Date.now()}-end`;
-  return {
-    id: `fig-${Date.now()}`,
-    root_pivot: {
+  const root_pivot: Pivot = {
       id: rootId,
       type: 'joint',
       x: 400,
       y: 300,
       children: [{ id: endId, type: 'joint', x: 400, y: 200, children: [] }],
-    },
-    shapes: [{ type: 'line', pivotIds: [rootId, endId] }],
-  };
+    };
+  const shapes: Shape[] = [{ type: 'line', pivotIds: [rootId, endId] }];
+  const { pivots, parentMap } = buildFlat(root_pivot);
+  return { id: `fig-${Date.now()}`, root_pivot, shapes, pivots, parentMap };
 };
 
 export const createCurve = (): Figure => {
   const rootId = `p-${Date.now()}-root`;
   const controlId = `p-${Date.now()}-control`;
   const endId = `p-${Date.now()}-end`;
-  return {
-    id: `fig-${Date.now()}`,
-    root_pivot: {
+  const root_pivot: Pivot = {
       id: rootId,
       type: 'joint',
       x: 350,
@@ -112,23 +125,23 @@ export const createCurve = (): Figure => {
           children: [{ id: endId, type: 'fixed', x: 450, y: 300, children: [] }],
         },
       ],
-    },
-    shapes: [{ type: 'curve', pivotIds: [rootId, controlId, endId] }],
-  };
+    };
+  const shapes: Shape[] = [{ type: 'curve', pivotIds: [rootId, controlId, endId] }];
+  const { pivots, parentMap } = buildFlat(root_pivot);
+  return { id: `fig-${Date.now()}`, root_pivot, shapes, pivots, parentMap };
 };
 
 export const createCircle = (): Figure => {
   const rootId = `p-${Date.now()}-root`;
   const radiusId = `p-${Date.now()}-radius`;
-  return {
-    id: `fig-${Date.now()}`,
-    root_pivot: {
+  const root_pivot: Pivot = {
       id: rootId,
       type: 'joint',
       x: 400,
       y: 300,
       children: [{ id: radiusId, type: 'joint', x: 450, y: 300, children: [] }],
-    },
-    shapes: [{ type: 'circle', pivotIds: [rootId, radiusId] }],
-  };
+    };
+  const shapes: Shape[] = [{ type: 'circle', pivotIds: [rootId, radiusId] }];
+  const { pivots, parentMap } = buildFlat(root_pivot);
+  return { id: `fig-${Date.now()}`, root_pivot, shapes, pivots, parentMap };
 };

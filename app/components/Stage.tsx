@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useStore } from '@/app/store/useStore';
 import { useInteraction } from '@/app/hooks/useInteraction';
 import { useFigureRender } from '@/app/hooks/useFigureRender';
@@ -18,6 +18,7 @@ export default function Stage() {
     builderFigure,
     builderTool,
     selectedPivotIds,
+    builderRootPivotId,
     addBuilderPivot,
     togglePivotSelection,
     setBuilderPivotType,
@@ -136,7 +137,7 @@ export default function Stage() {
   const frameToShow = isPlaying ? interpolatedFrame : project.frames[currentFrameIndex];
 
   // Builder mode click handler
-  const handleBuilderClick = (e: React.MouseEvent<SVGSVGElement>) => {
+  const handleBuilderClick = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
     if (editorMode !== 'figure' || !svgRef.current) return;
     
     const rect = svgRef.current.getBoundingClientRect();
@@ -146,46 +147,52 @@ export default function Stage() {
     if (builderTool === 'add-pivot') {
       addBuilderPivot(svgX, svgY);
     }
-  };
+  }, [editorMode, builderTool, addBuilderPivot]);
   
-  // Render builder pivots
-  const renderBuilderPivots = () => {
+  // Memoize pivot map for fast lookups
+  const pivotMapBuilder = useMemo(() => {
+    if (!builderFigure) return new Map();
+    const map = new Map();
+    builderFigure.pivots.forEach(p => map.set(p.id, p));
+    return map;
+  }, [builderFigure?.pivots]);
+  
+  // Render builder pivots - memoized to prevent unnecessary recalculations
+  const renderBuilderPivots = useMemo(() => {
     if (!builderFigure) return null;
-    
-    const allPivots: Array<{ pivot: Pivot; parent: Pivot | null }> = [];
-    const collectPivots = (pivot: Pivot, parent: Pivot | null = null) => {
-      allPivots.push({ pivot, parent });
-      pivot.children?.forEach((child) => collectPivots(child, pivot));
-    };
-    // root_pivot is a container; collect its children as roots
-    builderFigure.root_pivot.children.forEach((child) => collectPivots(child, builderFigure.root_pivot));
     
     return (
       <g>
         {/* Render shapes first */}
         {builderFigure.shapes.map((shape, idx) => {
-          if (shape.type === 'line' && shape.pivotIds.length >= 2) {
-            const findPivot = (id: string): Pivot | undefined => {
-              let found: Pivot | undefined;
-              const search = (p: Pivot) => {
-                if (p.id === id) { found = p; return; }
-                p.children?.forEach(search);
-              };
-              search(builderFigure.root_pivot);
-              return found;
-            };
-            
-            const p1 = findPivot(shape.pivotIds[0]);
-            const p2 = findPivot(shape.pivotIds[1]);
-            
-            if (p1 && p2) {
+          const p1 = pivotMapBuilder.get(shape.pivotIds[0]);
+          const p2 = pivotMapBuilder.get(shape.pivotIds[1]);
+
+          if (shape.type === 'line' && shape.pivotIds.length >= 2 && p1 && p2) {
+            return (
+              <line
+                key={`shape-${idx}`}
+                x1={p1.x}
+                y1={p1.y}
+                x2={p2.x}
+                y2={p2.y}
+                stroke={shape.color || builderFigure.color || '#000'}
+                strokeWidth={builderFigure.thickness || 4}
+                strokeLinecap="round"
+              />
+            );
+          }
+
+          if (shape.type === 'curve' && shape.pivotIds.length >= 3) {
+            const pc = pivotMapBuilder.get(shape.pivotIds[1]);
+            const p3 = pivotMapBuilder.get(shape.pivotIds[2]);
+            if (p1 && pc && p3) {
+              const d = `M ${p1.x} ${p1.y} Q ${pc.x} ${pc.y} ${p3.x} ${p3.y}`;
               return (
-                <line
+                <path
                   key={`shape-${idx}`}
-                  x1={p1.x}
-                  y1={p1.y}
-                  x2={p2.x}
-                  y2={p2.y}
+                  d={d}
+                  fill="none"
                   stroke={shape.color || builderFigure.color || '#000'}
                   strokeWidth={builderFigure.thickness || 4}
                   strokeLinecap="round"
@@ -193,20 +200,20 @@ export default function Stage() {
               );
             }
           }
+
           return null;
         })}
         
-        {/* Render pivots last for proper click handling */}
-        {allPivots.map(({ pivot, parent }) => {
-          const isRoot = parent?.id === builderFigure.root_pivot.id;
-          const isSelected = selectedPivotIds.includes(pivot.id);
+        {/* Render pivots */}
+        {builderFigure.pivots.map((pivot) => {
+          const isRoot = pivot.id === builderRootPivotId;
+          const isConnectingSelected = (builderTool === 'connect' || builderTool === 'connect-curve') && connectingPivots.includes(pivot.id);
           
           let fillColor = '#666';
-          if (isRoot) fillColor = '#3b82f6'; // Blue for root
-          else if (pivot.type === 'joint') fillColor = '#f97316'; // Orange for joint
-          else if (pivot.type === 'fixed') fillColor = '#6b7280'; // Gray for fixed
-          
-          if (isSelected) fillColor = '#8b5cf6'; // Purple for selected
+          if (isConnectingSelected) fillColor = '#10b981';
+          else if (isRoot) fillColor = '#3b82f6';
+          else if (pivot.type === 'joint') fillColor = '#f97316';
+          else if (pivot.type === 'fixed') fillColor = '#6b7280';
           
           return (
             <circle
@@ -215,20 +222,16 @@ export default function Stage() {
               cy={pivot.y}
               r={isRoot ? 6 : 4}
               fill={fillColor}
-              stroke="white"
-              strokeWidth="1.5"
               style={{ cursor: 'pointer' }}
               onMouseDown={(e) => {
                 e.stopPropagation();
-                if (builderTool === 'select') {
-                  if (svgRef.current) {
-                    const CTM = svgRef.current.getScreenCTM();
-                    if (CTM) {
-                      const mouseX = (e.clientX - CTM.e) / CTM.a;
-                      const mouseY = (e.clientY - CTM.f) / CTM.d;
-                      setBuilderDragOffset({ x: mouseX - pivot.x, y: mouseY - pivot.y });
-                      setBuilderDraggingPivotId(pivot.id);
-                    }
+                if (builderTool === 'select' && svgRef.current) {
+                  const CTM = svgRef.current.getScreenCTM();
+                  if (CTM) {
+                    const mouseX = (e.clientX - CTM.e) / CTM.a;
+                    const mouseY = (e.clientY - CTM.f) / CTM.d;
+                    setBuilderDragOffset({ x: mouseX - pivot.x, y: mouseY - pivot.y });
+                    setBuilderDraggingPivotId(pivot.id);
                   }
                 }
               }}
@@ -236,21 +239,22 @@ export default function Stage() {
                 e.stopPropagation();
                 if (builderTool === 'select') {
                   togglePivotSelection(pivot.id);
-                } else if (builderTool === 'connect') {
-                  // Add to connecting sequence
+                } else if (builderTool === 'connect' || builderTool === 'connect-curve') {
                   if (!connectingPivots.includes(pivot.id)) {
+                    const newLen = connectingPivots.length + 1;
                     addConnectingPivot(pivot.id);
-                    // Auto-create line if 2 pivots selected
-                    if (connectingPivots.length === 1) {
+                    if (newLen === (builderTool === 'connect-curve' ? 3 : 2)) {
                       createLineFromConnecting();
                     }
                   }
                 } else if (builderTool === 'set-root') {
                   setBuilderRootPivot(pivot.id);
                 } else if (builderTool === 'set-joint') {
-                  setBuilderPivotType(pivot.id, 'joint');
+                  setBuilderPivotType(pivot.id, pivot.type === 'joint' ? 'fixed' : 'joint');
                 } else if (builderTool === 'set-fixed') {
                   setBuilderPivotType(pivot.id, 'fixed');
+                } else if (builderTool === 'delete') {
+                  useStore.getState().removeBuilderPivot(pivot.id);
                 }
               }}
             />
@@ -258,7 +262,7 @@ export default function Stage() {
         })}
       </g>
     );
-  };
+  }, [builderFigure, pivotMapBuilder, builderRootPivotId, builderTool, connectingPivots, togglePivotSelection, addConnectingPivot, createLineFromConnecting, setBuilderRootPivot, setBuilderPivotType]);
 
   return (
     <>
@@ -266,7 +270,7 @@ export default function Stage() {
         ref={svgRef}
         viewBox="0 0 1280 720"
         onClick={editorMode === 'figure' ? handleBuilderClick : undefined}
-        onMouseMove={(e) => {
+        onMouseMove={useCallback((e: React.MouseEvent<SVGSVGElement>) => {
           if (editorMode === 'figure' && builderDraggingPivotId && svgRef.current) {
             const CTM = svgRef.current.getScreenCTM();
             if (CTM) {
@@ -283,8 +287,8 @@ export default function Stage() {
           } else {
             handleMouseMove(e);
           }
-        }}
-        onMouseUp={(e) => {
+        }, [editorMode, builderDraggingPivotId, builderDragOffset, draggingPivotId, handleMouseMove, handleDeleteMouseMove, moveBuilderPivot])}
+        onMouseUp={useCallback((e: React.MouseEvent<SVGSVGElement>) => {
           if (editorMode === 'figure' && builderDraggingPivotId) {
             setBuilderDraggingPivotId(null);
           } else if (svgRef.current && draggingPivotId) {
@@ -292,33 +296,36 @@ export default function Stage() {
             const svgX = ((e.clientX - rect.left) / rect.width) * 1280;
             const svgY = ((e.clientY - rect.top) / rect.height) * 720;
             
-            // Find figure ID from dragging pivot
-            const findFigureByPivot = (pivotId: string): string | null => {
-              const findInTree = (pivot: Pivot): boolean => {
-                if (pivot.id === pivotId) return true;
-                return pivot.children?.some((child: Pivot) => findInTree(child)) || false;
-              };
-              return frameToShow?.figures.find(fig => findInTree(fig.root_pivot))?.id || null;
-            };
+            const figureId = frameToShow?.figures.find(fig => 
+              fig.pivots?.some((p: any) => p.id === draggingPivotId) || 
+              fig.root_pivot && (() => {
+                let found = false;
+                const search = (pivot: any): void => {
+                  if (pivot.id === draggingPivotId) { found = true; return; }
+                  pivot.children?.forEach(search);
+                };
+                search(fig.root_pivot);
+                return found;
+              })()
+            )?.id || null;
             
-            const figureId = findFigureByPivot(draggingPivotId);
             handleMouseUp();
             handleDeleteMouseUp(svgX, svgY, figureId);
           } else {
             handleMouseUp();
           }
-        }}
-        onMouseLeave={() => {
+        }, [editorMode, builderDraggingPivotId, draggingPivotId, frameToShow, handleMouseUp, handleDeleteMouseUp])}
+        onMouseLeave={useCallback(() => {
           setBuilderDraggingPivotId(null);
           handleMouseUp();
           handleDeleteMouseUp(0, 0, null);
-        }}
+        }, [handleMouseUp, handleDeleteMouseUp])}
         className="bg-surface shadow-sm max-h-[calc(100vh-2rem)] mx-auto"
       >
         {editorMode === 'figure' ? (
           // Builder Mode Rendering
           <>
-            {renderBuilderPivots()}
+            {renderBuilderPivots}
           </>
         ) : (
           // Animation Mode Rendering

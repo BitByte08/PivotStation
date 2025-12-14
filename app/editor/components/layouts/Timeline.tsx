@@ -13,7 +13,10 @@ interface TimelineButtonProps {
 const TimelineButton: React.FC<TimelineButtonProps> = ({children, onClick, onContextMenu, className, active}) => (
   <div 
     onClick={onClick}
-    onContextMenu={onContextMenu}
+    onContextMenu={(e) => {
+      e.preventDefault();
+      onContextMenu?.(e);
+    }}
     className={`
         min-w-[3.5rem] h-[80%] rounded-md flex items-center justify-center cursor-pointer shrink-0 
         transition-all text-sm font-medium border overflow-hidden
@@ -65,8 +68,15 @@ const Timeline: React.FC = () => {
         setContextMenu(null);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    const handleContextMenu = () => {
+      // Don't close on context menu event
+    };
+    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('contextmenu', handleContextMenu);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('contextmenu', handleContextMenu);
+    };
   }, []);
 
   // Handle jump input
@@ -112,6 +122,8 @@ const Timeline: React.FC = () => {
 
   const handleFrameRightClick = (e: React.MouseEvent, frameIndex: number) => {
     e.preventDefault();
+    e.stopPropagation();
+    console.log('Right click on frame', frameIndex); // 디버깅용
     setContextMenu({ x: e.clientX, y: e.clientY, frameIndex });
   };
 
@@ -185,7 +197,7 @@ const Timeline: React.FC = () => {
         <div
           ref={contextMenuRef}
           className="fixed bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1"
-          style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
+          style={{ left: `${contextMenu.x}px` }}
         >
           <button
             onClick={() => handleDuplicateFrame(contextMenu.frameIndex)}
